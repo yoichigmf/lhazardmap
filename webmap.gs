@@ -690,6 +690,27 @@ function doGet(e) {
      return ContentService.createTextOutput(JSON.stringify( gjson, null, space  )).setMimeType(ContentService.MimeType.JSON);
 
   }
+  else if (CMD.toUpperCase() == 'PUTTEXT'){
+
+
+    let tgText = e.parameter['stext'];
+
+    　let  tgsheet = e.parameter['sheet'] ? e.parameter['sheet']:false;
+
+     if ( tgsheet === false ){  //  シートの指定が無い場合
+　　　　　　tgsheet = "シート1";
+     }
+
+
+     let  lat = e.parameter['lat'];
+     let  lon = e.parameter['lon'];
+
+
+     //  deploy?cmd=PUTTEXT&lat={}&lon={}&stext={}
+
+
+  }
+
     else if (CMD.toUpperCase() == 'GFTEST'){
     //   地物の取得
 
@@ -789,6 +810,74 @@ function addimage( bindata, resultfilename){
         fileurl = response["url"];
        
        Logger.log( fileurl);
+}
+
+function testMS( text, lat, lon ){
+   //　　書き込み対象シートを読み込み、最終行を取得
+  const mySheet = getTargetSheet();
+  const lastRow = mySheet.getLastRow();
+  // テキスト書き込み
+
+   mySheet.getRange(1 + lastRow, 3).setValue("location");
+
+   mySheet.getRange(1 + lastRow, 5).setValue(text);
+
+  mySheet.getRange(1 + lastRow, 6).setValue(lat);
+  mySheet.getRange(1 + lastRow, 7).setValue(lon);
+
+  let tm = Utilities.formatDate(new Date(timestamp), 'JST', 'yyyy-MM-dd HH:mm:ss');
+
+
+/*
+  mySheet.getRange(1 + lastRow, 1).setValue(Utilities.formatDate(new Date(timestamp), 'JST', 'yyyy-MM-dd HH:mm:ss'));
+
+  mySheet.getRange(1 + lastRow, 3).setValue("location");
+  //mySheet.getRange(1 + lastRow, 3).setValue(id);
+  mySheet.getRange(1 + lastRow, 5).setValue(text);
+
+  mySheet.getRange(1 + lastRow, 6).setValue(lat);
+  mySheet.getRange(1 + lastRow, 7).setValue(lon);
+  mySheet.getRange(1 + lastRow, 8).setValue('line');
+*/
+
+}
+
+function GetNow(){
+  const date = new Date();
+  const str = date.getFullYear() + '/' + (date.getMonth()+1) + '/' + date.getDate() + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
+  Logger.log(date);
+  Logger.log(str);
+  return date;
+
+}
+
+function  addMessage( text, lat, lon ){
+
+  
+
+  //　　書き込み対象シートを読み込み、最終行を取得
+  const mySheet = getTargetSheet();
+  const lastRow = mySheet.getLastRow();
+  // テキスト書き込み
+ 　//mySheet.getRange(1 + lastRow, 1).setValue(Utilities.formatDate(new Date(timestamp), 'JST', 'yyyy-MM-dd HH:mm:ss'));
+
+  now = GetNow();
+
+  mySheet.getRange(1 + lastRow, 1).setValue( now );
+ // mySheet.getRange(1 + lastRow, 2).setValue(userId);
+  mySheet.getRange(1 + lastRow, 3).setValue("location");
+  //mySheet.getRange(1 + lastRow, 3).setValue(id);
+  mySheet.getRange(1 + lastRow, 5).setValue(text);
+
+    mySheet.getRange(1 + lastRow, 6).setValue(lat);
+  mySheet.getRange(1 + lastRow, 7).setValue(lon);
+  mySheet.getRange(1 + lastRow, 8).setValue('line');
+
+  //mySheet.getRange(1 + lastRow, 8).setValue('LINE');
+  return 0;
+ 
+
+
 }
 
 function doPost(e) {

@@ -97,26 +97,182 @@ font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
 
 </style>
+
+
+
+
+
+
 </head>
 <body>
+
+
+
+  <style>
+    .listing-group {
+    font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    font-weight: 600;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1;
+    border-radius: 3px;
+    max-width: 100%;
+    color: #fff;
+    }
+     
+    .listing-group input[type='checkbox']:first-child + label {
+    border-radius: 3px 3px 0 0;
+    }
+     
+    .listing-group label:last-child {
+    border-radius: 0 0 3px 3px;
+    border: none;
+    }
+     
+    .listing-group input[type='checkbox'] {
+    display: none;
+    }
+     
+    .listing-group input[type='checkbox'] + label {
+    background-color: #3386c0;
+    display: block;
+    cursor: pointer;
+    padding: 10px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+    }
+     
+    .listing-group input[type='checkbox'] + label {
+    background-color: #3386c0;
+    text-transform: capitalize;
+    }
+     
+    .listing-group input[type='checkbox'] + label:hover,
+    .listing-group input[type='checkbox']:checked + label {
+    background-color: #4ea0da;
+    }
+     
+    .listing-group input[type='checkbox']:checked + label:before {
+    content: '✔';
+    margin-right: 5px;
+    }
+
+
+    .rounded-rect {
+background: white;
+border-radius: 10px;
+box-shadow: 0 0 50px -25px black;
+}
+ 
+.flex-center {
+position: absolute;
+display: flex;
+justify-content: center;
+align-items: center;
+}
+ 
+.flex-center.left {
+left: 0px;
+}
+ 
+.flex-center.right {
+right: 0px;
+}
+ 
+.sidebar-content {
+position: absolute;
+width: 100%;
+height: 95%;
+font-family: Arial, Helvetica, sans-serif;
+font-size: 32px;
+color: gray;
+}
+ 
+.sidebar-toggle {
+position: absolute;
+width: 1.3em;
+height: 1.3em;
+overflow: visible;
+display: flex;
+justify-content: center;
+align-items: center;
+}
+ 
+.sidebar-toggle.left {
+right: -1.5em;
+}
+ 
+.sidebar-toggle.right {
+left: -1.5em;
+}
+ 
+.sidebar-toggle:hover {
+color: #0aa1cf;
+cursor: pointer;
+}
+ 
+.sidebar {
+transition: transform 1s;
+z-index: 1;
+width: 300px;
+height: 100%;
+}
+ 
+/*
+The sidebar styling has them "expanded" by default, we use CSS transforms to push them offscreen
+The toggleSidebar() function removes this class from the element in order to expand it.
+*/
+.left.collapsed {
+transform: translateX(-295px);
+}
+ 
+.right.collapsed {
+transform: translateX(295px);
+}
+  </style>
+
+
  
 <div id='map'>
-<!--
-    <div data-role="navbar"  id="hbutton" >
-            <ul>
-                <li><a href="#nav_panel" id="move_display"  class="ui-btn ui-btn-icon-top ui-icon-navigation">位置指定</a>
-                     </li>
-                <li><a href="#panel" id="CONTACTS" class="ui-btn ui-btn-icon-top  ui-icon-grid">シート選択</a>
-           </li>
-                <li><a href="#panel_r" id="TRIPS"  class="ui-btn  ui-btn-icon-top  ui-icon-info">情報選択</a>
-           </li>
-                <li><a href="JavaScript:OpenLayerProp()"  class="ui-btn  ui-btn-icon-top ui-icon-location">地図指定</a>
-           </li>
 
-         </ul>
-     </div>  
-     -->
-     <!--  navbar -->
+
+  <div id="left" class="sidebar flex-center left collapsed">
+    <div class="sidebar-content rounded-rect flex-center">
+    Left Sidebar
+    <div
+    class="sidebar-toggle rounded-rect left"
+    onclick="toggleSidebar('left')"
+    >
+    &rarr;
+    </div>
+    </div>
+    </div>
+    <div id="right" class="sidebar flex-center right collapsed">
+    <div class="sidebar-content rounded-rect flex-center">
+    
+    <nav id="listing-group" class="listing-group">
+      <input type="checkbox" id="okayama-sinsui" checked="checked" />
+      <label for="okayama-sinsui">浸水想定図</label>
+      <input type="checkbox" id="okayama-dosekiryu" checked="checked" />
+      <label for="okayama-dosekiryu">土砂災害警戒区域（土石流)</label>
+    <!--
+      <input type="checkbox" id="waterarea" checked="checked" />
+      <label for="waterarea">水部</label>
+      -->
+    </nav>
+
+    <div
+    class="sidebar-toggle rounded-rect right"
+    onclick="toggleSidebar('right')"
+    >
+    &larr;
+    </div>
+    </div>
+    </div>
+</div>
+
+
+
 
   <div id="basemaps-selecter">
 
@@ -134,6 +290,39 @@ font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
 
 
 <script>
+
+
+function toggleSidebar(id) {
+  var elem = document.getElementById(id);
+  var classes = elem.className.split(' ');
+  var collapsed = classes.indexOf('collapsed') !== -1;
+ 
+  var padding = {};
+ 
+  if (collapsed) {
+// Remove the 'collapsed' class from the class list of the element, this sets it back to the expanded state.
+    classes.splice(classes.indexOf('collapsed'), 1);
+ 
+    padding[id] = 300; // In px, matches the width of the sidebars set in .sidebar CSS class
+    map.easeTo({
+        padding: padding,
+        duration: 1000 // In ms, CSS transition duration property for the sidebar matches this value
+        });
+    } else {
+        padding[id] = 0;
+// Add the 'collapsed' class to the class list of the element
+        classes.push('collapsed');
+ 
+    map.easeTo({
+        padding: padding,
+        duration: 1000
+      });
+  }
+ 
+// Update the class list on the element
+  elem.className = classes.join(' ');
+}
+
 var map = new maplibregl.Map({
   container: 'map',
   hash: true,
@@ -244,26 +433,29 @@ map.addSource(
 
 );
 
+//  'https://raw.githubusercontent.com/yoichigmf/lbmap/8adf0259ee93fa81f69a2ca4cbe3d1b4da69a50f/sprite/pin3.png',
+
+
 map.loadImage(
-  'https://raw.githubusercontent.com/yoichigmf/lbmap/8adf0259ee93fa81f69a2ca4cbe3d1b4da69a50f/sprite/pin3.png',
-function (error, image) {
-if (error) throw error;
-map.addImage('pin', image);
+  'https://raw.githubusercontent.com/yoichigmf/lbmap/511c8c3b03f785025f33c3e77ca313e72c1e737e/sprite/marker.png',
+   function (error, image) {
+       if (error) throw error;
+       map.addImage('pin', image);
 
 
 
-map.addLayer({
-'id': 'points',
-'type': 'symbol',
-'source': 'rpoints',
-'layout': {
-'icon-image': 'pin',
-'icon-size': 0.1
-}
-});
+       map.addLayer({
+            'id': 'points',
+            'type': 'symbol',
+            'source': 'rpoints',
+            'layout': {
+            'icon-image': 'pin',
+            'icon-size': 0.7
+                   }
+      });
 
 
-}
+    }
 );
 
 
@@ -298,6 +490,10 @@ new maplibregl.Popup()
 
 
 
+
+
+
+
 });
 
 
@@ -308,10 +504,6 @@ function  CreatePropertyHTML( prp ){
   var rhtml = "<table><TR><TH>項目</TH><TH>値</TH></TR>";
 
 
-  rhtml = rhtml + "<TR><TD>ユーザ名</TD><TD>";
-
-  rhtml = rhtml + prp["user"];
-  rhtml = rhtml + "</TD></TR>";
 
   rhtml = rhtml + "<TR><TD>日時</TD><TD>";
 
@@ -319,31 +511,12 @@ rhtml = rhtml + prp["date"];
 rhtml = rhtml + "</TD></TR>";
 
 
-rhtml = rhtml + "<TR><TD>住所</TD><TD>";
+rhtml = rhtml + "<TR><TD>テキスト</TD><TD>";
 
 rhtml = rhtml + prp["text"];
 rhtml = rhtml + "</TD></TR>";
 
 
-if ( prp["proplist"].length > 0 ){
-
-
-   for ( var rec of  prp["proplist"] ) {
-      rhtml = rhtml + "<TR><TD>種別</TD><TD>";
-
-      
-      rhtml = rhtml + rec["kind"];
-      rhtml = rhtml + "</TD></TR>";
-
-
-       rhtml = rhtml + "<TR><TD>ユーザ</TD><TD>";
-
-      rhtml = rhtml + rec["user"];
-      rhtml = rhtml + "</TD></TR>";
-   }
-
-
-  }
 
 
   rhtml = rhtml + "</table>";
@@ -401,6 +574,94 @@ const basemapsSelectElement = document.querySelector("#basemaps");
          }
 
         };
+
+
+map.on('click', add_content);
+
+
+
+
+
+
+
+var nmarker = new maplibregl.Marker();
+
+var popupv;
+
+function add_content (event) {
+  var coordinates = event.lngLat;
+  console.log('Lng:', coordinates.lng, 'Lat:', coordinates.lat);
+
+  formhtml = "<b>危険情報登録</b><br/><form  action=\"\"> <input type=\"text\" name=\"stext\"  METHOD=\"GET\" /><input type=\"submit\" value=\"登録\" onclick=\"commit(this.form)\">"
+    
+    
+    
+  formhtml = formhtml + "<input type=\"hidden\" name=\"lng\" value=\""  + coordinates.lng + "\"><input type=\"hidden\" name=\"lat\" value=\"" + coordinates.lat + "\"></form>";
+
+  popupv = new maplibregl.Popup({
+        closeOnClick: true
+      })
+      .setLngLat(coordinates )
+      .setHTML(formhtml)
+
+  popupv.addTo(map);
+
+
+ // nmarker.setLngLat(coordinates).addTo(map);
+}
+
+function commit(form){
+  popupv.remove();
+  console.log("commit");
+  console.log( form.stext.value );
+  console.log(form.lat.value );
+
+  var cd = {"lng":form.lng.value,  "lat":form.lat.value};
+  nmarker.setLngLat(cd).addTo(map);
+
+
+   //google.script.run.withSuccessHandler(sample).AccountCheck();
+/*
+   google.script.run
+      .withSuccessHandler( successf )
+      .withFailureHandler( failf )
+      .addMessage(form.stext.value, form.lat.value, form.lng.value ); 
+
+*/
+
+
+ google.script.run
+      .withSuccessHandler( successf )
+      .withFailureHandler( failf )
+      .addMessage(form.stext.value, form.lat.value, form.lng.value); 
+  //function  addMessage( text, lat, lon ){
+
+  return true;
+}
+
+function successf(){
+  console.log("success");
+
+}
+function failf(){
+   console.log("fail");
+
+}
+
+
+
+document
+.getElementById('listing-group')
+.addEventListener('change', function (e) {
+var layername = e.target.id;
+if (e.target.checked) {
+  map.setLayoutProperty(layername, 'visibility', 'visible');
+
+} else {
+  map.setLayoutProperty(layername, 'visibility', 'none');
+
+}
+});
 
 
 
