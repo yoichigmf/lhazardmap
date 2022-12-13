@@ -328,17 +328,17 @@ function ChangeMode(){
   const chk = document.inputmf.inputmode;
 
   if ( chk.checked ){
-   // alert("true");
+     //alert("true");
 
     map.on('click', add_content);
 
   }
   else{
- // alert( "false" );
+   //alert( "false" );
   
-    map.off('click'); 
+    map.off('click', add_content); 
 
-}
+  }
 
 
 }
