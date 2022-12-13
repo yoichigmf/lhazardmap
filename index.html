@@ -18,7 +18,7 @@ body { margin:0; padding:0; }
 
 #basemaps-selecter {
         position: absolute;
-        top: 20px;
+        top: 60px;
         left: 20px;
         background: rgba(255, 255, 255, 0);
         z-index:255;
@@ -47,7 +47,7 @@ body { margin:0; padding:0; }
 
 #displayTablechk{
         position: absolute;
-        top: 40px;
+        top: 80px;
         left: 20px;
         background: rgba(255, 255, 255, 0);
         z-index:255;
@@ -87,9 +87,21 @@ z-index:255;
   top: 0px;
 left: 0px;
 right: 0px;
-heiht: 100px;
+height: 100px;
 z-index:255;
 }
+
+#inputm  {
+ position: absolute;
+   background-color: #c5e3f9;
+  top: 15px;
+left: 20px;
+
+height: 20px;
+z-index:2;
+
+    }
+
 
 .mapboxgl-popup {
 max-width: 400px;
@@ -109,11 +121,12 @@ font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
 
 
   <style>
+  
     .listing-group {
     font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
     font-weight: 600;
     position: absolute;
-    top: 10px;
+    top: 80px;
     left: 10px;
     z-index: 1;
     border-radius: 3px;
@@ -236,6 +249,13 @@ transform: translateX(295px);
 <div id='map'>
 
 
+  <div id="inputm">
+  <form action="#" method="post">
+	<input type="checkbox" name="" value="">情報入力
+  </form>
+  </div>
+
+
   <div id="left" class="sidebar flex-center left collapsed">
     <div class="sidebar-content rounded-rect flex-center">
     Left Sidebar
@@ -247,7 +267,24 @@ transform: translateX(295px);
     </div>
     </div>
     </div>
+
+  
+
+
     <div id="right" class="sidebar flex-center right collapsed">
+
+    <div id="basemaps-selecter">
+
+            <select id="basemaps">
+         
+              <option value="pale">地理院タイル skelton</option>
+          
+              <option value="gsi_photo">地理院タイル写真</option>
+              </select>
+          
+          </div>
+
+
     <div class="sidebar-content rounded-rect flex-center">
     
     <nav id="listing-group" class="listing-group">
@@ -274,16 +311,7 @@ transform: translateX(295px);
 
 
 
-  <div id="basemaps-selecter">
 
-            <select id="basemaps">
-         
-              <option value="pale">地理院タイル skelton</option>
-          
-              <option value="gsi_photo">地理院タイル写真</option>
-              </select>
-          
-          </div>
 
 
 </div>
@@ -420,7 +448,9 @@ map.addSource('okayama-dosekiryuu-tiles', {
 
 
 
- var 　dpurl = <?= GetDeployURL(); ?>;
+ //var  dpurl = <?= GetDeployURL(); ?>;
+ 
+var  dpurl = "https://script.google.com/macros/s/AKfycby6wHJUYGXf11pH3iqeQUFe6pNU1lwt-ew0eW8qRAHj75wN_wt_39_e15SjQZ9PJk7eVA/exec"
 
  var   GetFURL  = dpurl + "?cmd=GETFEATURS";
 
