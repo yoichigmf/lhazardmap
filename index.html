@@ -250,9 +250,11 @@ transform: translateX(295px);
 
 
   <div id="inputm">
-  <form action="#" method="post">
-	<input type="checkbox" name="" value="">情報入力
-  </form>
+
+  <form name="inputmf">
+  
+	<input type="checkbox" onChange="ChangeMode()"  name="inputmode" />情報入力
+ </form>
   </div>
 
 
@@ -319,6 +321,27 @@ transform: translateX(295px);
 
 <script>
 
+
+//  地図クリック時の入力モード切り替え
+function ChangeMode(){
+
+  const chk = document.inputmf.inputmode;
+
+  if ( chk.checked ){
+   // alert("true");
+
+    map.on('click', add_content);
+
+  }
+  else{
+ // alert( "false" );
+  
+    map.off('click'); 
+
+}
+
+
+}
 
 function toggleSidebar(id) {
   var elem = document.getElementById(id);
@@ -606,7 +629,7 @@ const basemapsSelectElement = document.querySelector("#basemaps");
         };
 
 
-map.on('click', add_content);
+
 
 
 
