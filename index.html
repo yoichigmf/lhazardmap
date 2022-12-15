@@ -422,6 +422,33 @@ map.addControl(new maplibregl.ScaleControl() );
 map.on('load', function () {
 
 
+  
+map.addSource('gsi_raster', {
+  
+  'type': 'raster',
+   tiles: [
+               'https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg',
+           ],
+  'tileSize': 256,
+  'attribution':
+  '国土地理院',
+
+       });
+
+map.addLayer({
+   'id':'gsi_photo',
+      'type':'raster',
+      'source':'gsi_raster',
+      'minzoom':5,
+      'maxzoom':18,
+      'layout':{
+              'visibility':'none'
+              },
+       paint:{  'raster-opacity': 1.0}
+
+      });
+      
+
  //var  dpurl = <?= GetDeployURL(); ?>;
  
  var  dpurl = "https://script.google.com/macros/s/AKfycbzVgG6u-v1IrE-OM8eCQfbPR0XAu7LazRjY7ViYlX_uwdlYd-uMW_GOT5RM0pA2TRcBwA/exec"
