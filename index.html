@@ -264,6 +264,7 @@ transform: translateX(295px);
     <div
     class="sidebar-toggle rounded-rect left"
     onclick="toggleSidebar('left')"
+    id="la"
     >
     &rarr;
     </div>
@@ -290,11 +291,13 @@ transform: translateX(295px);
     <div class="sidebar-content rounded-rect flex-center">
     
     <nav id="listing-group" class="listing-group">
+
+      <!--
       <input type="checkbox" id="okayama-sinsui" checked="checked" />
       <label for="okayama-sinsui">浸水想定図</label>
       <input type="checkbox" id="okayama-dosekiryu" checked="checked" />
       <label for="okayama-dosekiryu">土砂災害警戒区域（土石流)</label>
-    <!--
+    
       <input type="checkbox" id="waterarea" checked="checked" />
       <label for="waterarea">水部</label>
       -->
@@ -303,6 +306,7 @@ transform: translateX(295px);
     <div
     class="sidebar-toggle rounded-rect right"
     onclick="toggleSidebar('right')"
+    id="ra"
     >
     &larr;
     </div>
@@ -347,6 +351,8 @@ function toggleSidebar(id) {
   var elem = document.getElementById(id);
   var classes = elem.className.split(' ');
   var collapsed = classes.indexOf('collapsed') !== -1;
+
+  var left =  classes.indexOf('left') !== -1;
  
   var padding = {};
  
@@ -355,6 +361,17 @@ function toggleSidebar(id) {
     classes.splice(classes.indexOf('collapsed'), 1);
  
     padding[id] = 300; // In px, matches the width of the sidebars set in .sidebar CSS class
+
+    if ( left ){
+      //alert('left');
+      var lftbtn = document.getElementById("la");
+      lftbtn.innerHTML =  "&larr;";
+    }
+    else {
+      //alert('right');
+      var rigbtn = document.getElementById("ra");
+      rigbtn.innerHTML =  "&rarr;";
+    }
     map.easeTo({
         padding: padding,
         duration: 1000 // In ms, CSS transition duration property for the sidebar matches this value
@@ -363,6 +380,17 @@ function toggleSidebar(id) {
         padding[id] = 0;
 // Add the 'collapsed' class to the class list of the element
         classes.push('collapsed');
+
+    if ( left ){
+
+      var lftbtn = document.getElementById("la");
+      lftbtn.innerHTML =  "&rarr;";
+    }
+    else {
+      //alert('right');
+      var rigbtn = document.getElementById("ra");
+      rigbtn.innerHTML =  "&larr;";
+    }
  
     map.easeTo({
         padding: padding,
@@ -394,90 +422,108 @@ map.addControl(new maplibregl.ScaleControl() );
 map.on('load', function () {
 
 
-map.addSource('gsi_raster', {
-  
-                    'type': 'raster',
-                     tiles: [
-                                 'https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg',
-                             ],
-                    'tileSize': 256,
-                    'attribution':
-                    '国土地理院',
-  
-                         });
-
-map.addLayer({
-                     'id':'gsi_photo',
-                        'type':'raster',
-                        'source':'gsi_raster',
-                        'minzoom':5,
-                        'maxzoom':18,
-                        'layout':{
-                                'visibility':'none'
-                                },
-                         paint:{  'raster-opacity': 1.0}
-
-                        });
-
-
-
-map.addSource('okayama-raster-tiles', {
-  
-  'type': 'raster',
-  'tiles': [
-  'https://disaportaldata.gsi.go.jp/raster/01_flood_l2_shinsuishin_pref_data/33/{z}/{x}/{y}.png'
-  ],
-  'tileSize': 256,
-  'attribution':
-  '岡山県'
-  
-  });
-
-  map.addLayer({
- 'id':'okayama-sinsui',
- 'type':'raster',
- 'source':'okayama-raster-tiles',
- 'minzoom':2,
- 'maxzoom':17,
- paint:{   "raster-opacity": 0.5}
-
-});
-
-
-
-
-map.addSource('okayama-dosekiryuu-tiles', {
-  
-  'type': 'raster',
-  'tiles': [
-  'https://disaportaldata.gsi.go.jp/raster/05_dosekiryukeikaikuiki_data/33/{z}/{x}/{y}.png'
-  ],
-  'tileSize': 256,
-  'attribution':
-  '岡山県'
-  
-  });
-
-
-  map.addLayer({
- 'id':'okayama-dosekiryu',
- 'type':'raster',
- 'source':'okayama-dosekiryuu-tiles',
- 'minzoom':2,
- 'maxzoom':17,
- paint:{   "raster-opacity": 0.5}
-
-});
-
-
-
  //var  dpurl = <?= GetDeployURL(); ?>;
  
-var  dpurl = "https://script.google.com/macros/s/AKfycby6wHJUYGXf11pH3iqeQUFe6pNU1lwt-ew0eW8qRAHj75wN_wt_39_e15SjQZ9PJk7eVA/exec"
+ var  dpurl = "https://script.google.com/macros/s/AKfycbzVgG6u-v1IrE-OM8eCQfbPR0XAu7LazRjY7ViYlX_uwdlYd-uMW_GOT5RM0pA2TRcBwA/exec"
 
  var   GetFURL  = dpurl + "?cmd=GETFEATURS";
 
-//  'https://script.google.com/macros/s/AKfycbwvROUTmO3FkehnHRsnTntX_LyI_Tf8_7PSSsjie471XrTA93gn2jG8XRmXuN-1nKLk1Q/exec?cmd=GETFEATURS'
+ var   GetRaster = dpurl + "?cmd=GETRASTERLAYERS"
+
+ var   RasterLayers = [];
+
+
+ fetch(GetRaster, {
+    method: "GET",
+    mode: "cors"
+  })
+  .then(response => {
+    if (response.ok) {
+      return response.json();
+    }
+    // 404 や 500 ステータスならここに到達する
+    throw new Error('Network response was not ok.');
+  })
+  .then(resJson => {
+
+    RasterLayers = resJson;
+
+    var nc = 1;
+    for ( const rstl of  RasterLayers ){
+         console.log( rstl["name"]);
+         
+         atr = rstl["credit"];
+         scname = "src" + nc;
+
+         rstl["source_id"] = scname;
+
+         map.addSource(scname, {
+  
+          'type': 'raster',
+          'tiles': [
+                       rstl["url"]
+           ],
+               'tileSize': 256,
+                'attribution':
+                       atr
+  
+               });
+
+          lyname = "ly" + nc;
+
+         rstl["layer_id"] = lyname;
+
+         opc = rstl["opaq"];
+
+         zmin = rstl["minz"];
+         zmax = rstl["maxz"];
+
+         vis = rstl["display"];
+
+         vtext = 'none';
+         if ( vis == 1){
+              vtext = 'visible';
+         }
+         map.addLayer({
+             'id':lyname,
+             'type':'raster',
+             'source':scname,
+             'minzoom':zmin,
+             'maxzoom':zmax,
+             'layout':{ 'visibility':vtext },
+              paint:{   "raster-opacity": opc}
+
+              });
+             // map.setLayoutProperty('point_sample', 'visibility', 'none');
+           ++nc;
+         }
+
+
+         var rvlay = RasterLayers.reverse();
+
+         var ihtml = " ";
+         for ( const rstl of  rvlay  ){
+
+
+            chkstr = " ";
+            if ( rstl["display"] == 1){
+              chkstr = " checked=\"checked\" ";
+
+            }
+
+            ihtml = ihtml  + " " + "<input type=\"checkbox\" id=\"" + rstl["layer_id"] + "\""  + chkstr + " /> <label for=\"" + rstl["layer_id"] + "\" >" + rstl["name"] + "</label>"; 
+
+         }
+
+
+         var  lgp = document.getElementById("listing-group");
+         lgp.innerHTML =  ihtml ;
+
+
+    //console.log(JSON.stringify(RasterLayers));
+
+    
+
 map.addSource( 
         'rpoints', {
         'type': 'geojson',
@@ -486,7 +532,6 @@ map.addSource(
 
 );
 
-//  'https://raw.githubusercontent.com/yoichigmf/lbmap/8adf0259ee93fa81f69a2ca4cbe3d1b4da69a50f/sprite/pin3.png',
 
 
 map.loadImage(
@@ -514,6 +559,19 @@ map.loadImage(
 
 
 
+  })
+  .catch(error => {
+    // ネットワークエラーの場合はここに到達する
+    console.error(error);
+  })
+
+
+
+
+
+
+//   ポイントクリックイベント
+
   map.on('click', 'points', function (e) {
         var coordinates = e.features[0].geometry.coordinates.slice();
 //var description = e.features[0].properties.description;
@@ -527,12 +585,6 @@ map.loadImage(
        console.log('A click event occurred.');
 
  
-// Ensure that if the map is zoomed out such that multiple
-// copies of the feature are visible, the popup appears
-// over the copy being pointed to.
-//while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-//coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-//}
  
 new maplibregl.Popup()
 .setLngLat(coordinates)
