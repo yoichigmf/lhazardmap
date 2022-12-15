@@ -614,6 +614,46 @@ function sheetnames() {
 }
 
 
+function testRastL(){
+
+  let gjs = GetRasterLayers();
+}
+
+function GetRasterLayers(){
+
+  
+  let tgSheet =  SpreadsheetApp.getActiveSpreadsheet().getSheetByName( '#rastermaps' );
+
+  const rows = tgSheet.getLastRow(); 
+
+
+  if ( rows > 1){
+
+     for ( let ir = 2 ; ir <= rows; ++ir ){
+        let tgr = tgSheet.getRange(ir,1 ,1,10).getValues();
+
+        //console.log( tgr );
+       // console.log(tgr[0][7]);
+
+        let key = tgr[0][0];
+        let name = tgr[0][1];
+        let kind  = tgr[0][2];
+        let url   = tgr[0][3];
+        let credit = tgr[0][4];
+        let maxz = tgr[0][5];
+        let minz = tgr[0][6];
+
+        let legend = tgr[0][7];
+        let opaq  = tgr[0][8];
+        let display = tgr[0][9];
+        console.log( name );
+
+     }
+
+  }
+
+
+}
 
 function testgjson(){
 
@@ -672,6 +712,18 @@ function doGet(e) {
 
 
   }　
+  else if (CMD.toUpperCase() == 'GETRASTERLAYERS'){
+   let rlayers = GetRasterLayers();
+
+   　space = 2;
+     console.log( JSON.stringify( rlayers, null,space ));
+
+     return ContentService.createTextOutput(JSON.stringify( rlayers, null, space  )).setMimeType(ContentService.MimeType.JSON);
+
+
+  }
+
+
   else if (CMD.toUpperCase() == 'GETFEATURS'){
     //   地物の取得
 
