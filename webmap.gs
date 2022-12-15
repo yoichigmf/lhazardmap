@@ -90,9 +90,14 @@ function make_filename_path( kind, ext ){  //  make unique file name full path
 }
 
 
-//   最新デプロイURLを返す
+//   最新デプロイURLを返す   手動で設定することにした
 function GetDeployURL(){
- var webapps = ScriptApp.getService().getUrl();
+
+  var pSheet = getPropetySheet();
+
+   var webapps = pSheet.getRange(7, 2).getValue();
+
+// var webapps = ScriptApp.getService().getUrl();
 
  return webapps;
 
@@ -616,7 +621,10 @@ function sheetnames() {
 
 function testRastL(){
 
-  let gjs = GetRasterLayers();
+  let rlayers = GetRasterLayers();
+
+  　space = 2;
+    console.log( JSON.stringify( rlayers, null,space ));
 }
 
 function GetRasterLayers(){
@@ -625,6 +633,9 @@ function GetRasterLayers(){
   let tgSheet =  SpreadsheetApp.getActiveSpreadsheet().getSheetByName( '#rastermaps' );
 
   const rows = tgSheet.getLastRow(); 
+
+  let  rjson = [];
+
 
 
   if ( rows > 1){
@@ -646,13 +657,31 @@ function GetRasterLayers(){
         let legend = tgr[0][7];
         let opaq  = tgr[0][8];
         let display = tgr[0][9];
-        console.log( name );
+        //console.log( name );
+
+        let  rlayer = {};
+        rlayer["key"] = key;
+        rlayer["name"] = name;
+        rlayer["kind"] = kind;
+        rlayer["url"] = url;
+
+        rlayer["credit"] = credit;
+        rlayer["maxz"] = maxz;
+        rlayer["minz"] = minz;
+
+        rlayer["legend"] = legend;
+        rlayer["opaq"] = opaq;
+        rlayer["display"] = display;
+
+        rjson.push( rlayer );
 
      }
 
   }
 
 
+  //console.log( rjson );
+  return rjson ;
 }
 
 function testgjson(){
