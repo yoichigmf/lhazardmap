@@ -20,14 +20,26 @@ const FOLDER_ID = ScriptProperties.getProperty('FOLDER_ID');
 const REPLY_URL = 'https://api.line.me/v2/bot/message/reply';
 
 function onOpen() {
-    var murl = mapDisplayURL();
 
-    var pSheet = getPropetySheet();
+    const customMenu = SpreadsheetApp.getUi()
+  　customMenu.createMenu('地図機能')　//メニューバーに表示するカスタムメニュー名
+      .addItem('地図を開く', 'openMapUrl')　//メニューアイテムを追加
+      .addToUi()
 
-    pSheet.getRange(7, 2).setValue(murl);
+    //var murl = mapDisplayURL();
+
+    //var pSheet = getPropetySheet();
+
+    //pSheet.getRange(7, 2).setValue(murl);
 
 
 }
+
+function openMapUrl(){
+  let html = '<h1>地図</h1><script>window.onload = function(){google.script.run.withSuccessHandler(function(url){window.open(url,"_blank");google.script.host.close();}).mapDisplayURL();}</script>';
+  SpreadsheetApp.getUi().showModelessDialog(HtmlService.createHtmlOutput(html),"地図を開きます");
+}
+
 
 function  mapDisplayURL(){
 
