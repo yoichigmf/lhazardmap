@@ -116,18 +116,22 @@ font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
 
 
 </head>
-<body>
+<body >
 
 
 
   <style>
-  
+    .legendarea {
+    font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    font-weight: 400;
+    }
+
     .listing-group {
     font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
-    font-weight: 600;
+    font-weight: 400;
     position: absolute;
     top: 80px;
-    left: 10px;
+    left: 5px;
     z-index: 1;
     border-radius: 3px;
     max-width: 100%;
@@ -151,7 +155,7 @@ font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
     background-color: #3386c0;
     display: block;
     cursor: pointer;
-    padding: 10px;
+    padding: 5px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.25);
     }
      
@@ -244,37 +248,111 @@ transform: translateX(295px);
 }
   </style>
 
+<style>
+  .drag-list li {
+    font-size: medium;
+    line-height:3em;
+    border:1px solid #cccccc;
+    cursor:pointer;
+  }
+
+
+  .arrow-top{
+    border: 0;
+    border-top: solid 2px #051181;
+    border-right: solid 2px #051181;
+    display: inline-block;
+    transform: rotate(-45deg);
+    width: 10px;
+    height: 10px;
+}
+
+.arrow-right{
+    border: 0;
+    border-top: solid 2px #fb3c3c;
+    border-right: solid 2px #fb3c3c;
+    display: inline-block;
+    transform: rotate(45deg);
+    width: 10px;
+    height: 10px;
+}
+
+.arrow-bottom{
+    border: 0;
+    border-bottom: solid 2px #feb64a;
+    border-right: solid 2px #feb64a;
+    display: inline-block;
+    transform: rotate(45deg);
+    width: 10px;
+    height: 10px;
+}
+
+.arrow-left{
+    border: 0;
+    border-top: solid 2px #128b8e;
+    border-left: solid 2px #128b8e;
+    display: inline-block;
+    transform: rotate(-45deg);
+    width: 10px;
+    height: 10px;
+}
+
+
+/*  ---------------------
+   以下は調整用
+ --------------------- */
+a{
+  margin: 0 5px;
+}
+  </style>
+
+
+
+
 
  
-<div id='map'>
+<div id='map'  >
 
 
+
+  <!--  map click mode select  -->
   <div id="inputm">
 
   <form name="inputmf">
-  
 	<input type="checkbox" onChange="ChangeMode()"  name="inputmode" />情報入力
  </form>
   </div>
 
 
+
   <div id="left" class="sidebar flex-center left collapsed">
     <div class="sidebar-content rounded-rect flex-center">
-    Left Sidebar
-    <div
-    class="sidebar-toggle rounded-rect left"
-    onclick="toggleSidebar('left')"
-    id="la"
-    >
-    &rarr;
+
+      <div id="legend" class="legendarea">
+
+
+      </div>
+
+  <!--
+   <ul>
+    <li><input type="text" id="srcn" name="srcn" >src</li>
+    <li><input type="text"  id="tgt" name="tgt" >tgt</li>
+    <li><input type="button" onClick="movelayer()" name="move"></li>
+  </ul>
+   -->
+
+    <!-- button -->
+      <div class="sidebar-toggle rounded-rect left"
+                onclick="toggleSidebar('left')"   id="la"  >
+               &rarr;
+        </div>
     </div>
-    </div>
-    </div>
+  </div>
 
   
 
 
-    <div id="right" class="sidebar flex-center right collapsed">
+    <div id="right"   class="sidebar flex-center right collapsed">
 
     <div id="basemaps-selecter">
 
@@ -285,31 +363,29 @@ transform: translateX(295px);
               <option value="gsi_photo">地理院タイル写真</option>
               </select>
           
-          </div>
+     </div>
 
 
-    <div class="sidebar-content rounded-rect flex-center">
-    
-    <nav id="listing-group" class="listing-group">
+    <div  class="sidebar-content rounded-rect flex-center">
 
-      <!--
-      <input type="checkbox" id="okayama-sinsui" checked="checked" />
-      <label for="okayama-sinsui">浸水想定図</label>
-      <input type="checkbox" id="okayama-dosekiryu" checked="checked" />
-      <label for="okayama-dosekiryu">土砂災害警戒区域（土石流)</label>
-    
-      <input type="checkbox" id="waterarea" checked="checked" />
-      <label for="waterarea">水部</label>
-      -->
-    </nav>
+   
+    <!--   layer list -->
+        <ui id="listing-group"  class="listing-group">
 
-    <div
-    class="sidebar-toggle rounded-rect right"
-    onclick="toggleSidebar('right')"
-    id="ra"
-    >
-    &larr;
-    </div>
+     
+         </ui>
+
+ 
+  
+
+
+
+   <!-- button -->
+     <div  class="sidebar-toggle rounded-rect right"
+                  onclick="toggleSidebar('right')"
+                 id="ra"   >
+                &larr;
+       </div>
     </div>
     </div>
 </div>
@@ -320,10 +396,128 @@ transform: translateX(295px);
 
 
 
-</div>
+</div>  <!--  end of map -->
+
 
 
 <script>
+
+  function movelayer(){
+
+    let se = document.getElementById('srcn');
+    let tg = document.getElementById('tgt');
+    let lay1 = se.value;
+    let lay2  = tg.value;
+
+    let lmsg = "map.moveLayer( " + lay1 + "," + lay2 + ");"
+    console.log( lmsg );
+
+    map.moveLayer( lay1, lay2 );
+    // alert(se.value);
+  }
+  var  bottom_layer_id = "";
+
+  //   ドラッグ用のイベント登録
+  function SetDragScript(){
+    document.querySelectorAll('.drag-list li').forEach (elm => {
+    elm.ondragstart = function () {
+      event.dataTransfer.setData('text/plain', event.target.id);
+    };
+    elm.ondragover = function () {
+      event.preventDefault();
+      let rect = this.getBoundingClientRect();
+      if ((event.clientY - rect.top) < (this.clientHeight / 2)) {
+        //マウスカーソルの位置が要素の半分より上
+        this.style.borderTop = '2px solid blue';
+        this.style.borderBottom = '';
+      } else {
+        //マウスカーソルの位置が要素の半分より下
+        this.style.borderTop = '';
+        this.style.borderBottom = '2px solid blue';
+      }
+    };
+    elm.ondragleave = function () {
+      this.style.borderTop = '';
+      this.style.borderBottom = '';
+    };
+    elm.ondrop = function () {
+      event.preventDefault();
+      let id = event.dataTransfer.getData('text/plain');
+      let elm_drag = document.getElementById(id);
+
+      let layerid = "";
+
+      if ( this.draggable){
+        layerid = this.children[0].id;
+      }
+
+      
+
+      let layerid2 = elm_drag.children[0].id;
+
+      //console.log( layerid);
+      //console.log( layerid2);
+  
+      let rect = this.getBoundingClientRect();
+      if ((event.clientY - rect.top) < (this.clientHeight / 2)) {
+        //マウスカーソルの位置が要素の半分より上
+
+        if ( this.draggable ){
+          map.moveLayer( layerid2, layerid);
+           // map.moveLayer( layerid2, layerid);
+        }
+        else {
+          map.moveLayer( layerid2 );
+        }
+
+        this.parentNode.insertBefore(elm_drag, this);
+
+         
+        //map.moveLayer( layerid, layerid2);
+        console.log( layerid2);
+
+        console.log( layerid);
+      } else {
+        //マウスカーソルの位置が要素の半分より下
+        let id1  = elm_drag.children[0].id;
+
+        let id2 =  "id__2";
+
+        if ( this.nextSibling.draggable ){
+          id2= this.nextSibling.children[0].id;
+
+           map.moveLayer( id1, id2);
+        }
+        else {
+
+          map.moveLayer( id1 ,bottom_layer_id );
+        }
+       
+
+        this.parentNode.insertBefore(elm_drag, this.nextSibling);
+
+        console.log(id1);
+        console.log(id2);     
+      }
+      this.style.borderTop = '';
+      this.style.borderBottom = '';
+    };
+  });
+  }
+</script>
+
+
+
+
+<script>
+
+var myWindow;
+function openPopup( pvalue ) {
+    myWindow = window.open("", "myWindow", "width=200,height=100,menubar=0,status=0,location=0,toolbar=0,top=100");
+    myWindow.document.write("<p>ポップアップ表示だよ</p>");
+}
+
+
 
 
 //  地図クリック時の入力モード切り替え
@@ -347,6 +541,7 @@ function ChangeMode(){
 
 }
 
+//   slide area  toggle  
 function toggleSidebar(id) {
   var elem = document.getElementById(id);
   var classes = elem.className.split(' ');
@@ -362,10 +557,16 @@ function toggleSidebar(id) {
  
     padding[id] = 300; // In px, matches the width of the sidebars set in .sidebar CSS class
 
+    //   矢印反転
     if ( left ){
       //alert('left');
       var lftbtn = document.getElementById("la");
       lftbtn.innerHTML =  "&larr;";
+      var legendarea = document.getElementById("legend");
+
+      let leghtml = GetLegendHTML();
+
+      legendarea.innerHTML = leghtml;
     }
     else {
       //alert('right');
@@ -381,6 +582,8 @@ function toggleSidebar(id) {
 // Add the 'collapsed' class to the class list of the element
         classes.push('collapsed');
 
+
+    //  矢印反転
     if ( left ){
 
       var lftbtn = document.getElementById("la");
@@ -401,6 +604,8 @@ function toggleSidebar(id) {
 // Update the class list on the element
   elem.className = classes.join(' ');
 }
+
+
 
 var map = new maplibregl.Map({
   container: 'map',
@@ -447,7 +652,8 @@ map.addLayer({
        paint:{  'raster-opacity': 1.0}
 
       });
-      
+
+  bottom_layer_id  = 'gsi_photo';
 
  //var  dpurl = <?= GetDeployURL(); ?>;
  
@@ -457,9 +663,10 @@ map.addLayer({
 
  var   GetRaster = dpurl + "?cmd=GETRASTERLAYERS"
 
- var   RasterLayers = [];
+ RasterLayers = [];
 
 
+ //  SpreadSheetに定義したラスタレイヤリストを設定する
  fetch(GetRaster, {
     method: "GET",
     mode: "cors"
@@ -477,7 +684,7 @@ map.addLayer({
 
     var nc = 1;
     for ( const rstl of  RasterLayers ){
-         console.log( rstl["name"]);
+         // console.log( rstl["name"]);
          
          atr = rstl["credit"];
          scname = "src" + nc;
@@ -496,7 +703,9 @@ map.addLayer({
   
                });
 
+            
           lyname = "ly" + nc;
+          console.log( lyname + " " + rstl["name"]);
 
          rstl["layer_id"] = lyname;
 
@@ -526,9 +735,14 @@ map.addLayer({
          }
 
 
+         //  ラスタレイヤリストを反転させてチェックボックスリストにする　（ドラッグで順番を変えられる）
          var rvlay = RasterLayers.reverse();
 
-         var ihtml = " ";
+         
+
+         var ihtml = "<ul class=\"drag-list\"> ";
+
+         var idv = 0;
          for ( const rstl of  rvlay  ){
 
 
@@ -538,19 +752,41 @@ map.addLayer({
 
             }
 
-            ihtml = ihtml  + " " + "<input type=\"checkbox\" id=\"" + rstl["layer_id"] + "\""  + chkstr + " /> <label for=\"" + rstl["layer_id"] + "\" >" + rstl["name"] + "</label>"; 
+            idc = "idn" + idv;
 
+            var rlayerid = rstl["layer_id"] ;
+
+            
+             ihtml = ihtml  + "<li draggable=\"false\"   id=\"" +  idc + "\"  name=\"" + rlayerid + 
+                "\"></a><input type=\"checkbox\" onChange=\"changeCheck( this )\"      id=\"" + rlayerid + "\""  + chkstr + " /> <label     for=\"" + rlayerid  + "\" >" + rstl["name"] + "</label></li>"; 
+
+              
+
+           // ihtml = ihtml  + "<li draggable=\"false\" oncontextmenu=\"openPopup( this )\"  id=\"" +  idc + "\"  name=\"" + rlayerid + 
+            //  "\"></a><input type=\"checkbox\" onChange=\"changeCheck( this )\"      id=\"" + rlayerid + "\""  + chkstr + " /> <label     for=\"" + rlayerid  + "\" >" + rstl["name"] + "</label></li>"; 
+
+              
+
+             // changeCheck( check, id  ){
+            ++idv;
          }
 
+         ihtml = ihtml + "<li draggable=\"false\"  style=\"border:0;list-style-type:none;\">&nbsp;</li></ul>"
 
          var  lgp = document.getElementById("listing-group");
+
+         //var  lgp = document.getElementById("llist");
          lgp.innerHTML =  ihtml ;
+         console.log(ihtml);
+         SetDragScript();   //  動的に作成した要素に対するイベントは作成後に追加　　ドラッグイベントを追加
+
+
 
 
     //console.log(JSON.stringify(RasterLayers));
 
     
-
+//    Spread Sheet中の調査ポイントを追加
 map.addSource( 
         'rpoints', {
         'type': 'geojson',
@@ -560,7 +796,7 @@ map.addSource(
 );
 
 
-
+//    調査ポイントのアイコン
 map.loadImage(
   'https://raw.githubusercontent.com/yoichigmf/lbmap/511c8c3b03f785025f33c3e77ca313e72c1e737e/sprite/marker.png',
    function (error, image) {
@@ -592,12 +828,13 @@ map.loadImage(
     console.error(error);
   })
 
+  //  右ボタンメニュー制御
+  //document.oncontextmenu = function () {return false;}
 
 
 
 
-
-//   ポイントクリックイベント
+//   調査ポイントクリックイベント
 
   map.on('click', 'points', function (e) {
         var coordinates = e.features[0].geometry.coordinates.slice();
@@ -605,14 +842,14 @@ map.loadImage(
 
    
 
-       
+       //  ポップアップ用のHTML作成
        var description = CreatePropertiesHTML( e.features);
 
 
        console.log('A click event occurred.');
 
  
- 
+ //   ポップアップ
 new maplibregl.Popup()
 .setLngLat(coordinates)
 .setHTML(description)
@@ -629,6 +866,76 @@ new maplibregl.Popup()
 });
 
 
+
+// 
+function GetLegendHTML(){
+
+   var tghtml = "<table>";
+
+    let leg_list = GetLegendList();
+
+    for ( const leg of  leg_list ){
+
+      leg_url = leg["legend"];
+      leg_name = leg["name"];
+      tghtml = tghtml + "<TR><TD>";
+
+      tghtml = tghtml + leg_name + "<br><img src=\"" + leg_url + "\"  />";
+
+      tghtml = tghtml + "</TD></TR>";
+
+    }
+
+
+    tghtml = tghtml + "</table>";
+
+    return tghtml;
+}
+
+
+//　凡例URLのリストを返す
+function GetLegendList() {
+
+  var legend_array = [];
+
+  for ( const rstl of  RasterLayers ){
+     if ( rstl["display"] ==1 ){
+      var  leg = {};
+      leg["legend"] = rstl["legend"];
+      leg["name"] = rstl["name"];
+
+      legend_array.push( leg );
+     }
+  }
+
+   return legend_array;
+}
+
+function layerup( lid ){
+
+     alert( lid  + " up");
+
+}
+
+function layerdown( lid ){
+  alert( lid  + " down");
+}
+
+function lblClick( ivl ){
+
+  var  chk = ivl.children[0];
+
+  alert(chk.id);
+
+  return false;
+}
+
+function nothing( iv ){
+
+alert("nothing click");
+
+return false;
+}
 
 
 function  CreatePropertyHTML( prp ){
@@ -720,6 +1027,7 @@ var nmarker = new maplibregl.Marker();
 
 var popupv;
 
+//   情報登録
 function add_content (event) {
   var coordinates = event.lngLat;
   console.log('Lng:', coordinates.lng, 'Lat:', coordinates.lat);
@@ -782,6 +1090,20 @@ function failf(){
 
 
 
+function  changeCheck( check  ){
+
+var layername = check.id;
+if (check.checked) {
+  map.setLayoutProperty(layername, 'visibility', 'visible');
+
+} else {
+  map.setLayoutProperty(layername, 'visibility', 'none');
+
+}
+
+
+}
+/*
 document
 .getElementById('listing-group')
 .addEventListener('change', function (e) {
@@ -794,9 +1116,10 @@ if (e.target.checked) {
 
 }
 });
-
+*/
 
 
 </script>
+
  
 </body>
