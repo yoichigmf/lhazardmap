@@ -1089,7 +1089,7 @@ function failf(){
 }
 
 
-
+//     レイヤ表示のチェック変更
 function  changeCheck( check  ){
 
 var layername = check.id;
@@ -1101,8 +1101,29 @@ if (check.checked) {
 
 }
 
+ChangeCheckInArray( check );
 
 }
+
+//  レイヤアレイ中のチェック変更
+function  ChangeCheckInArray( check ){
+  for ( const rstl of  RasterLayers ){
+       if ( rstl["layer_id"]== check.id){
+        if (check.checked) {
+           rstl["display"] = 1;
+        }
+        else {
+          rstl["display"] = 0;
+        }
+
+       }
+
+  }
+
+
+}
+
+
 /*
 document
 .getElementById('listing-group')
