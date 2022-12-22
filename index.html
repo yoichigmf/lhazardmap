@@ -562,11 +562,9 @@ function toggleSidebar(id) {
       //alert('left');
       var lftbtn = document.getElementById("la");
       lftbtn.innerHTML =  "&larr;";
-      var legendarea = document.getElementById("legend");
 
-      let leghtml = GetLegendHTML();
-
-      legendarea.innerHTML = leghtml;
+      updateLegendHtml();  //  凡例HTMLの更新
+   
     }
     else {
       //alert('right');
@@ -657,7 +655,7 @@ map.addLayer({
 
  //var  dpurl = <?= GetDeployURL(); ?>;
  
- var  dpurl = "https://script.google.com/macros/s/AKfycbzVgG6u-v1IrE-OM8eCQfbPR0XAu7LazRjY7ViYlX_uwdlYd-uMW_GOT5RM0pA2TRcBwA/exec"
+ var  dpurl = "https://script.google.com/macros/s/AKfycbwDiPrWiJlpN5aPGuAGNkTCea1-q9Rv_bwLoVtqR2qtvWKQMjHt1beLUoumOtAKMDFEfQ/exec"
 
  var   GetFURL  = dpurl + "?cmd=GETFEATURS";
 
@@ -865,6 +863,13 @@ new maplibregl.Popup()
 
 });
 
+function updateLegendHtml(){//  凡例HTMLの更新
+      var legendarea = document.getElementById("legend");
+
+      let leghtml = GetLegendHTML();
+
+      legendarea.innerHTML = leghtml;
+    }  
 
 
 // 
@@ -1101,7 +1106,13 @@ if (check.checked) {
 
 }
 
+//   配列内データ更新
 ChangeCheckInArray( check );
+
+//   HTMLを更新する
+updateLegendHtml();
+
+
 
 }
 
