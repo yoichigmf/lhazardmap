@@ -7,6 +7,8 @@
 <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
 <script src="https://unpkg.com/maplibre-gl@2.1.9/dist/maplibre-gl.js"></script>
 <link href="https://unpkg.com/maplibre-gl@2.1.9/dist/maplibre-gl.css" rel="stylesheet" />
+<script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
+
 <style>
 body { margin:0; padding:0; }
 #map {
@@ -779,19 +781,53 @@ map.addLayer({
          SetDragScript();   //  動的に作成した要素に対するイベントは作成後に追加　　ドラッグイベントを追加
 
 
-
+         var gfeature ;
 
     //console.log(JSON.stringify(RasterLayers));
+        var request = new XMLHttpRequest();
+        request.open("GET", GetFURL, true);
+        request.send();
+      
+        request.responseTyoe = 'json';
 
-    
-//    Spread Sheet中の調査ポイントを追加
-map.addSource( 
-        'rpoints', {
-        'type': 'geojson',
-         'data':GetFURL  
-        }
+        request.onload = function() {   //onload
+             var  gj = request.response;
+      
+             gfeature = JSON.parse(gj);
+      
+             if ( gfeature["features"].length > 1 ) {  //  地物があるか
+                var bbox = turf.bbox(gfeature);
+         
+                map.fitBounds( bbox );
+      
+      
+             }
+             else {
+      
+              if (  gfeature["features"].length == 1 ) {
+                   gf = gfeature["features"][0]["geometry"]["coordinates"];
+      
+                   lng = gf[0];
+                   lat = gf[1];
+                   map.flyTo( {centor:[lng,lat], zoom:15, speed:0.3});
+      
+              }
+              else {
+              navigator.geolocation.getCurrentPosition(pos_success,pos_fail);
+              }
+             }
+      
+      
+       //    Spread Sheet中の調査ポイントを追加 
 
-);
+       map.addSource( 
+                           'rpoints', {
+                              'type': 'geojson',
+                              'data': gfeature
+                                }
+      
+                            );
+
 
 
 //    調査ポイントのアイコン
@@ -816,6 +852,28 @@ map.loadImage(
 
     }
 );
+
+
+
+       
+     
+
+
+          }
+
+
+//    Spread Sheet中の調査ポイントを追加
+/*
+map.addSource( 
+        'rpoints', {
+        'type': 'geojson',
+         'data':GetFURL  
+        }
+
+);
+*/
+
+
 
 
 
@@ -862,6 +920,28 @@ new maplibregl.Popup()
 
 
 });
+
+
+ 
+function pos_fail(pos){
+                //  alert('位置情報の取得に失敗しました。エラーコード：');
+             }
+      
+      
+function pos_success(pos){
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          //const accuracy = pos.coords.accuracy;
+      
+              map.flyTo( {centor:[lng,lat], zoom:10, speed:0.3});
+          //$('#loc').text(`緯度：${lat} 経度：${lng}`);
+          //$('#accuracy').text(accuracy);
+            }
+
+
+
+
+
 
 function updateLegendHtml(){//  凡例HTMLの更新
       var legendarea = document.getElementById("legend");
