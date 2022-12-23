@@ -879,15 +879,33 @@ function GetLegendHTML(){
 
     let leg_list = GetLegendList();
 
+    var  addlist = [];
+
+
     for ( const leg of  leg_list ){
 
       leg_url = leg["legend"];
       leg_name = leg["name"];
-      tghtml = tghtml + "<TR><TD>";
 
-      tghtml = tghtml + leg_name + "<br><img src=\"" + leg_url + "\"  />";
 
-      tghtml = tghtml + "</TD></TR>";
+      let dupli = checkeaddList( leg_url, addlist );
+
+      if ( ! dupli ){
+      
+           tghtml = tghtml + "<TR><TD>";
+
+           wstr = "width=\"200\" ";
+
+
+          
+
+          tghtml = tghtml + leg_name + "<br><img src=\"" + leg_url + "\" " + wstr + "/>";
+
+           tghtml = tghtml + "</TD></TR>";
+
+           addlist.push( leg_url );
+      }
+
 
     }
 
@@ -895,6 +913,23 @@ function GetLegendHTML(){
     tghtml = tghtml + "</table>";
 
     return tghtml;
+}
+
+function checkeaddList( legend , leglist){
+
+  var ret = false;
+
+  for ( const leg of leglist ){
+
+     if ( legend == leg ){
+        ret = true;
+     }
+  }
+
+
+  return ret;
+
+
 }
 
 
