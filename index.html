@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset='utf-8' />
-<title>ハザードマップサンプル</title>
+<title>ハザードマップ</title>
 </title>
 <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
 <script src="https://unpkg.com/maplibre-gl@2.1.9/dist/maplibre-gl.js"></script>
@@ -134,9 +134,11 @@ font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
     position: absolute;
     top: 80px;
     left: 5px;
+    bottom:3px;
     z-index: 1;
     border-radius: 3px;
     max-width: 100%;
+    overflow-y:scroll;
     color: #fff;
     }
      
@@ -234,6 +236,7 @@ cursor: pointer;
 transition: transform 1s;
 z-index: 1;
 width: 300px;
+
 height: 100%;
 }
  
@@ -306,6 +309,12 @@ transform: translateX(295px);
 a{
   margin: 0 5px;
 }
+
+#legend {
+  width:100%;
+  height:98%;
+  overflow-y:auto;
+}
   </style>
 
 
@@ -360,7 +369,7 @@ a{
 
             <select id="basemaps">
          
-              <option value="pale">地理院タイル skelton</option>
+              <option value="pale">地理院タイル標準地図</option>
           
               <option value="gsi_photo">地理院タイル写真</option>
               </select>
@@ -403,6 +412,9 @@ a{
 
 
 <script>
+
+  //   GAS で動いているかどうかを示すモード  1 GAS   0  not GAS
+  var  GasMode = 0;
 
   function movelayer(){
 
@@ -605,12 +617,14 @@ function toggleSidebar(id) {
   elem.className = classes.join(' ');
 }
 
+tstyle =  'https://raw.githubusercontent.com/gsi-cyberjapan/optimal_bvmap/main/style/skeleton.json'
 
+stdstyle =  'https://raw.githubusercontent.com/gsi-cyberjapan/gsivectortile-mapbox-gl-js/master/std.json'
 
 var map = new maplibregl.Map({
   container: 'map',
   hash: true,
-  style: 'https://raw.githubusercontent.com/gsi-cyberjapan/optimal_bvmap/main/style/skeleton.json', //style.jsonへのパス
+  style: stdstyle , //style.jsonへのパス
   center: [134.0188, 34.755387],  
   zoom: 15,
   maxZoom: 17.99,
@@ -655,9 +669,14 @@ map.addLayer({
 
   bottom_layer_id  = 'gsi_photo';
 
- //var  dpurl = <?= GetDeployURL(); ?>;
+  var  dpurl;
+  if ( GasMode == 1 ){
+       //  dpurl = <?= GetDeployURL(); ?>;
+    }
+  else {
  
- var  dpurl = "https://script.google.com/macros/s/AKfycbwDiPrWiJlpN5aPGuAGNkTCea1-q9Rv_bwLoVtqR2qtvWKQMjHt1beLUoumOtAKMDFEfQ/exec"
+       dpurl = "https://script.google.com/macros/s/AKfycbwnapMxlBL7JePYShTOjeeuhSfXQGAwZT9AtMs0DpFW0bO7Pxvn5Iy-8fmQPz0wlG4WfQ/exec"
+  }
 
  var   GetFURL  = dpurl + "?cmd=GETFEATURS";
 
@@ -735,7 +754,7 @@ map.addLayer({
          }
 
 
-         //  ラスタレイヤリストを反転させてチェックボックスリストにする　（ドラッグで順番を変えられる）
+         //  ラスタレイヤリストを反転させてチェックボックスリストにする　
          var rvlay = RasterLayers.reverse();
 
          
@@ -995,6 +1014,7 @@ function GetLegendHTML(){
     return tghtml;
 }
 
+//   同一の凡例が追加されているかどうかのチェック
 function checkeaddList( legend , leglist){
 
   var ret = false;
@@ -1152,10 +1172,13 @@ function add_content (event) {
   var coordinates = event.lngLat;
   console.log('Lng:', coordinates.lng, 'Lat:', coordinates.lat);
 
-  formhtml = "<b>危険情報登録</b><br/><form  action=\"\"> <input type=\"text\" name=\"stext\"  METHOD=\"GET\" /><input type=\"submit\" value=\"登録\" onclick=\"commit(this.form)\">"
+  formhtml = "<b>危険情報登録</b><br/><form  METHOD=\"GET\”  action=\"\"   enctype=\"multipart/form-data\" >";
+  formhtml = formhtml + "<input type=\"text\" name=\"stext\"  METHOD=\"GET\" />";
+
     
+  formhtml = formhtml + "<input type=\"file\" name=\"imgf\" ><br>";
     
-    
+  formhtml = formhtml + "<input type=\"submit\" value=\"登録\" onclick=\"commit(this.form)\">"
   formhtml = formhtml + "<input type=\"hidden\" name=\"lng\" value=\""  + coordinates.lng + "\"><input type=\"hidden\" name=\"lat\" value=\"" + coordinates.lat + "\"></form>";
 
   popupv = new maplibregl.Popup({
@@ -1177,6 +1200,8 @@ function commit(form){
   console.log(form.lat.value );
 
   var cd = {"lng":form.lng.value,  "lat":form.lat.value};
+
+  //   レイヤにポイント追加するように改造必要  20221227
   nmarker.setLngLat(cd).addTo(map);
 
 
@@ -1189,12 +1214,17 @@ function commit(form){
 
 */
 
-
+//  GASの場合　GASで定義した addMessage という関数を実行している
+if ( GasMode == 1){
  google.script.run
       .withSuccessHandler( successf )
       .withFailureHandler( failf )
       .addMessage(form.stext.value, form.lat.value, form.lng.value); 
   //function  addMessage( text, lat, lon ){
+
+  }
+  //  GASでない場合は　Postで登録できるようにしておく
+
 
   return true;
 }
