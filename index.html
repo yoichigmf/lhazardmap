@@ -134,9 +134,11 @@ font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
     position: absolute;
     top: 80px;
     left: 5px;
+    bottom:3px;
     z-index: 1;
     border-radius: 3px;
     max-width: 100%;
+    overflow-y:scroll;
     color: #fff;
     }
      
@@ -234,6 +236,7 @@ cursor: pointer;
 transition: transform 1s;
 z-index: 1;
 width: 300px;
+
 height: 100%;
 }
  
@@ -306,6 +309,12 @@ transform: translateX(295px);
 a{
   margin: 0 5px;
 }
+
+#legend {
+  width:100%;
+  height:98%;
+  overflow-y:auto;
+}
   </style>
 
 
@@ -360,7 +369,7 @@ a{
 
             <select id="basemaps">
          
-              <option value="pale">地理院タイル skelton</option>
+              <option value="pale">地理院タイル標準地図</option>
           
               <option value="gsi_photo">地理院タイル写真</option>
               </select>
@@ -608,12 +617,14 @@ function toggleSidebar(id) {
   elem.className = classes.join(' ');
 }
 
+tstyle =  'https://raw.githubusercontent.com/gsi-cyberjapan/optimal_bvmap/main/style/skeleton.json'
 
+stdstyle =  'https://raw.githubusercontent.com/gsi-cyberjapan/gsivectortile-mapbox-gl-js/master/std.json'
 
 var map = new maplibregl.Map({
   container: 'map',
   hash: true,
-  style: 'https://raw.githubusercontent.com/gsi-cyberjapan/optimal_bvmap/main/style/skeleton.json', //style.jsonへのパス
+  style: stdstyle , //style.jsonへのパス
   center: [134.0188, 34.755387],  
   zoom: 15,
   maxZoom: 17.99,
@@ -660,9 +671,13 @@ map.addLayer({
 
   var  dpurl;
   if ( GasMode == 1 ){
-         dpurl = <?= GetDeployURL(); ?>;
+        dpurl = <?= GetDeployURL(); ?>;
     }
-  
+  else {
+ 
+       dpurl = "dummy";
+  }
+
  var   GetFURL  = dpurl + "?cmd=GETFEATURS";
 
  var   GetRaster = dpurl + "?cmd=GETRASTERLAYERS"
