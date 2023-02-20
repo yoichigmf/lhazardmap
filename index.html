@@ -1225,9 +1225,14 @@ function  CreatePropertyHTML( prp ){
 
 
 
-  rhtml = rhtml + "<TR><TD>日時</TD><TD>";
+  rhtml = rhtml + "<TR><TD>登録日時</TD><TD>";
 
 rhtml = rhtml + prp["date"];
+rhtml = rhtml + "</TD></TR>";
+
+rhtml = rhtml + "<TR><TD>種別</TD><TD>";
+
+rhtml = rhtml + prp["kind"];
 rhtml = rhtml + "</TD></TR>";
 
 
