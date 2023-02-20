@@ -65,8 +65,8 @@ function GetFeaturesGeoJSON( sheetname ){
 
         }
 
-
-        if ( kind == "location") {
+        //if ( kind == "location") {
+        if ( 1) {
                console.log(userd);
       
 
