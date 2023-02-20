@@ -637,11 +637,46 @@ var map = new maplibregl.Map({
 map.addControl(new maplibregl.NavigationControl(), 'bottom-right');
 map.addControl(new maplibregl.ScaleControl() );
 
+const loadImageAsPromise = (map, url) => {
+  return new Promise((resolve, reject) => {
+    map.loadImage(url, (error, image) => {
+      if (image != null) {
+        resolve(image);
+      } else {
+        reject(error);
+      }
+    });
+  });
+};
 
-map.on('load', function () {
 
+//map.on('load', function () {
+
+  var  dpurl;
+  if ( GasMode == 1 ){
+       //  dpurl = <?= GetDeployURL(); ?>;
+    }
+  else {
+ 
+       dpurl = "https://script.google.com/macros/s/AKfycbyD9EK2Rso0xvi4IklshadmSdsq1w_AZdVdAGCB-okr_GD4jrK8B3i0D5bDT3Rva0cb7w/exec"
+  }
+
+ var   GetFURL  = dpurl + "?cmd=GETFEATURS";
+
+ var   GetRaster = dpurl + "?cmd=GETRASTERLAYERS"
+ 
+
+map.once('load', async () => {
+
+// Icons by https://icons8.com/
+const images = await Promise.all([
+    loadImageAsPromise(map, 'https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/AED.png'),
+    loadImageAsPromise(map, 'https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/public_phone.png'),
+  
+  ]);
 
   
+map.addImage('public_phone', images[1]);
 map.addSource('gsi_raster', {
   
   'type': 'raster',
@@ -669,18 +704,7 @@ map.addLayer({
 
   bottom_layer_id  = 'gsi_photo';
 
-  var  dpurl;
-  if ( GasMode == 1 ){
-       //  dpurl = <?= GetDeployURL(); ?>;
-    }
-  else {
  
-       dpurl = "https://script.google.com/macros/s/AKfycbwnapMxlBL7JePYShTOjeeuhSfXQGAwZT9AtMs0DpFW0bO7Pxvn5Iy-8fmQPz0wlG4WfQ/exec"
-  }
-
- var   GetFURL  = dpurl + "?cmd=GETFEATURS";
-
- var   GetRaster = dpurl + "?cmd=GETRASTERLAYERS"
 
  RasterLayers = [];
 
@@ -846,15 +870,21 @@ map.addLayer({
                                 }
       
                             );
+//https://github.com/yoichigmf/lhazardmap/blob/develop/icon/AED.png?raw=true
 
+//https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/AED.png
 
-
+//'https://raw.githubusercontent.com/yoichigmf/lbmap/511c8c3b03f785025f33c3e77ca313e72c1e737e/sprite/marker.png',
 //    調査ポイントのアイコン
 map.loadImage(
-  'https://raw.githubusercontent.com/yoichigmf/lbmap/511c8c3b03f785025f33c3e77ca313e72c1e737e/sprite/marker.png',
+  'https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/AED.png',
    function (error, image) {
        if (error) throw error;
-       map.addImage('pin', image);
+       map.addImage('aed', image);
+
+
+
+
 
 
 
@@ -863,10 +893,11 @@ map.loadImage(
             'type': 'symbol',
             'source': 'rpoints',
             'layout': {
-            'icon-image': 'pin',
+            'icon-image': 'public_phone',
             'icon-size': 0.7
                    }
       });
+   
 
 
     }
