@@ -637,11 +637,110 @@ var map = new maplibregl.Map({
 map.addControl(new maplibregl.NavigationControl(), 'bottom-right');
 map.addControl(new maplibregl.ScaleControl() );
 
+const loadImageAsPromise = (map, url) => {
+  return new Promise((resolve, reject) => {
+    map.loadImage(url, (error, image) => {
+      if (image != null) {
+        resolve(image);
+      } else {
+        reject(error);
+      }
+    });
+  });
+};
 
-map.on('load', function () {
 
+function getDefaultJsonHeaders() { return {
+    'Accept': 'application/json',
+    'Content-Type': 'application/x-www-form-urlencoded',
+}}
+
+const loadSymbols = ( url ) => {
+     return new Promise((resolv,reject ) => {
+
+      //  SpreadSheetに定義したシンボルリストを設定する
+
+      const data = {
+
+      };
+
+      fetch(url, {
+          method: "GET",
+          headers: {
+          "Accept": 'application/json',
+          "Content-Type": 'application/x-www-form-urlencoded'
+          },
+          mode: "cors"
+           })
+       .then(response => {
+             if (response.ok) {
+             return response.json();
+             }
+         // 404 や 500 ステータスならここに到達する
+          throw new Error('Network response was not ok.');
+           })
+          .then(retJson => {
+
+            return retJson
+          })
+
+
+
+     });
+};
+
+
+//map.on('load', function () {
+
+  var  dpurl;
+  if ( GasMode == 1 ){
+       //  dpurl = <?= GetDeployURL(); ?>;
+    }
+  else {
+    
+ 
+       dpurl = "";""
+  }
+
+ var   GetFURL  = dpurl + "?cmd=GETFEATURS";
+
+ var   GetRaster = dpurl + "?cmd=GETRASTERLAYERS";
+
+ var   GetSymbols = dpurl + "?cmd=SYMBOLS";
+
+
+
+map.once('load', async () => {
+
+ // const symboljson = await Promise.all ([
+ // loadSymbols(GetSymbols )
+//]
+//);
+
+
+// Icons by https://icons8.com/
+const images = await Promise.all([
+    loadImageAsPromise(map, 'https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/AED.png'),
+    loadImageAsPromise(map, 'https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/conveni.png'),
+    loadImageAsPromise(map, 'https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/fire_extinguisher.png'),
+    loadImageAsPromise(map, 'https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/public_phone.png'),
+    loadImageAsPromise(map, 'https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/pump.png'),
+    loadImageAsPromise(map, 'https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/warehouse.png'),
+    loadImageAsPromise(map, 'https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/water_tunk.png')
+  ]);
 
   
+map.addImage('AED', images[0]);
+map.addImage('conveni', images[1]);
+map.addImage('fire_extinguisher', images[2]);
+map.addImage('public_phone', images[3]);
+map.addImage('pump', images[4]);
+map.addImage('warehouse', images[5]);
+map.addImage('water_tunk', images[6
+]);
+
+
+
 map.addSource('gsi_raster', {
   
   'type': 'raster',
@@ -669,18 +768,7 @@ map.addLayer({
 
   bottom_layer_id  = 'gsi_photo';
 
-  var  dpurl;
-  if ( GasMode == 1 ){
-        dpurl = <?= GetDeployURL(); ?>;
-    }
-  else {
  
-       dpurl = "dummy";
-  }
-
- var   GetFURL  = dpurl + "?cmd=GETFEATURS";
-
- var   GetRaster = dpurl + "?cmd=GETRASTERLAYERS"
 
  RasterLayers = [];
 
@@ -839,6 +927,52 @@ map.addLayer({
       
        //    Spread Sheet中の調査ポイントを追加 
 
+       gfeature.features.forEach(function (feature) {
+            fkind = feature.properties['kind'];
+
+            ad = "AED";
+
+            if ( fkind  == "AED" ) {
+                ad = "AED";
+            } 
+
+            if ( fkind  == "コンビニ" ) {
+                ad = "conveni";
+            } 
+
+            if ( fkind  == "消火器" ) {
+                ad = "fire_extinguisher";
+            } 
+
+            if ( fkind  == "公衆電話" ) {
+                ad = "public_phone";
+            } 
+
+
+
+            if ( fkind  == "可搬ポンプ" ) {
+                ad = "pump";
+            } 
+
+            if ( fkind  == "防災倉庫・備蓄倉庫" ) {
+                ad = "warehouse";
+            } 
+
+            if ( fkind  == "応急給水タンク" ) {
+                ad = "water_tunk";
+            } 
+
+
+
+
+
+  
+
+            feature.properties['icon'] = ad;
+
+       });
+
+
        map.addSource( 
                            'rpoints', {
                               'type': 'geojson',
@@ -846,15 +980,21 @@ map.addLayer({
                                 }
       
                             );
+//https://github.com/yoichigmf/lhazardmap/blob/develop/icon/AED.png?raw=true
 
+//https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/AED.png
 
-
+//'https://raw.githubusercontent.com/yoichigmf/lbmap/511c8c3b03f785025f33c3e77ca313e72c1e737e/sprite/marker.png',
 //    調査ポイントのアイコン
-map.loadImage(
-  'https://raw.githubusercontent.com/yoichigmf/lbmap/511c8c3b03f785025f33c3e77ca313e72c1e737e/sprite/marker.png',
-   function (error, image) {
-       if (error) throw error;
-       map.addImage('pin', image);
+//map.loadImage(
+ // 'https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/AED.png',
+ //  function (error, image) {
+  //     if (error) throw error;
+     //  map.addImage('aed', image);
+
+
+
+
 
 
 
@@ -863,14 +1003,15 @@ map.loadImage(
             'type': 'symbol',
             'source': 'rpoints',
             'layout': {
-            'icon-image': 'pin',
+            'icon-image': ['get', 'icon'],
             'icon-size': 0.7
                    }
       });
+   
 
 
-    }
-);
+  //  }
+//);
 
 
 
@@ -1084,9 +1225,14 @@ function  CreatePropertyHTML( prp ){
 
 
 
-  rhtml = rhtml + "<TR><TD>日時</TD><TD>";
+  rhtml = rhtml + "<TR><TD>登録日時</TD><TD>";
 
 rhtml = rhtml + prp["date"];
+rhtml = rhtml + "</TD></TR>";
+
+rhtml = rhtml + "<TR><TD>種別</TD><TD>";
+
+rhtml = rhtml + prp["kind"];
 rhtml = rhtml + "</TD></TR>";
 
 

@@ -706,6 +706,59 @@ function testgjson(){
 
 }
 
+function testSymbols(){
+
+  let gj = GetSymbolsJSON( "#symbol" );
+  console.log(gj);
+  let js =JSON.stringify( gj );
+
+  console.log(js);
+
+}
+
+
+//  　シンボル定義をJSONで返す
+function GetSymbolsJSON( sheetname ){
+
+  
+  let tgSheet =  SpreadsheetApp.getActiveSpreadsheet().getSheetByName( sheetname );
+
+  const rows = tgSheet.getLastRow(); 
+
+  let  rjson = [];
+
+
+
+  if ( rows > 1){
+
+     for ( let ir = 2 ; ir <= rows; ++ir ){
+        let tgr = tgSheet.getRange(ir,1 ,1,3).getValues();
+
+        //console.log( tgr );
+       // console.log(tgr[0][7]);
+
+        let name = tgr[0][0];
+        let id = tgr[0][1];
+        let icon = tgr[0][2];
+
+        let  rlayer = {};
+
+        rlayer["name"] = name;
+        rlayer["id"] = id;
+        rlayer["icon"] = icon;
+
+        console.log( rlayer );
+
+        rjson.push( rlayer );
+
+
+     }
+  }
+
+   return rjson ;
+
+}
+
 function  getGeoJson(){
 
 let gjson =
@@ -800,6 +853,22 @@ function doGet(e) {
 
 
      //  deploy?cmd=PUTTEXT&lat={}&lon={}&stext={}
+
+
+  }
+
+  else if (CMD.toUpperCase() == 'SYMBOLS'){
+
+
+    let tgsheet = "#symbol";
+    
+     
+     let gjson = GetSymbolsJSON( tgsheet );
+
+　　　space = 2;
+     console.log( JSON.stringify( gjson, null,space ));
+
+     return ContentService.createTextOutput(JSON.stringify( gjson, null, space  )).setMimeType(ContentService.MimeType.JSON);
 
 
   }
