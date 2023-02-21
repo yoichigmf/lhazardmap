@@ -655,39 +655,39 @@ function getDefaultJsonHeaders() { return {
     'Content-Type': 'application/x-www-form-urlencoded',
 }}
 
-const loadSymbols = ( url ) => {
-     return new Promise((resolv,reject ) => {
+function  GetSymbolsF( url ){
 
-      //  SpreadSheetに定義したシンボルリストを設定する
+     //console.log(JSON.stringify(RasterLayers));
+     var request = new XMLHttpRequest();
+        request.open("GET", url, false);
 
-      const data = {
+        try {
+        request.send();
 
-      };
+        if (request.status != 200) {
+             alert(`Error ${request.status}: ${request.statusText}`);
+              } else {
+                var  gj = request.response;
+      
+                gfeature = JSON.parse(gj);
 
-      fetch(url, {
-          method: "GET",
-          headers: {
-          "Accept": 'application/json',
-          "Content-Type": 'application/x-www-form-urlencoded'
-          },
-          mode: "cors"
-           })
-       .then(response => {
-             if (response.ok) {
-             return response.json();
-             }
-         // 404 や 500 ステータスならここに到達する
-          throw new Error('Network response was not ok.');
-           })
-          .then(retJson => {
-
-            return retJson
-          })
+              return gfeature;
+              }
 
 
 
-     });
-};
+        }
+        catch( err ){
+          alert("request failed");
+        }
+      
+    
+      
+
+
+
+}
+
 
 
 //map.on('load', function () {
@@ -699,7 +699,7 @@ const loadSymbols = ( url ) => {
   else {
     
  
-       dpurl = "https://script.google.com/macros/s/AKfycbyUTKvTXzES1yPNOKGxMyQKbwWGmEWs-7hk5qz1pxvn1giCoGa1BNIy7S-A4lvjZhKK-Q/exec"
+       dpurl = "https://script.google.com/macros/s/AKfycbz1p7jEFY-8DLg8r8tWiOA9lDySYtjhng7qgPJKbG_D2iVhmdfXkw9ae3bMtDuSIza7/exec";
   }
 
  var   GetFURL  = dpurl + "?cmd=GETFEATURS";
@@ -708,36 +708,27 @@ const loadSymbols = ( url ) => {
 
  var   GetSymbols = dpurl + "?cmd=SYMBOLS";
 
+SymbolList = [];
+var  idTrans = {};
+
 
 
 map.once('load', async () => {
 
- // const symboljson = await Promise.all ([
- // loadSymbols(GetSymbols )
-//]
-//);
+
+  //   シンボルの定義をSpread Sheetから読み込んで配列に格納する
 
 
-// Icons by https://icons8.com/
-const images = await Promise.all([
-    loadImageAsPromise(map, 'https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/AED.png'),
-    loadImageAsPromise(map, 'https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/conveni.png'),
-    loadImageAsPromise(map, 'https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/fire_extinguisher.png'),
-    loadImageAsPromise(map, 'https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/public_phone.png'),
-    loadImageAsPromise(map, 'https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/pump.png'),
-    loadImageAsPromise(map, 'https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/warehouse.png'),
-    loadImageAsPromise(map, 'https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/water_tunk.png')
-  ]);
+SymbolList = await GetSymbolsF( GetSymbols );
 
-  
-map.addImage('AED', images[0]);
-map.addImage('conveni', images[1]);
-map.addImage('fire_extinguisher', images[2]);
-map.addImage('public_phone', images[3]);
-map.addImage('pump', images[4]);
-map.addImage('warehouse', images[5]);
-map.addImage('water_tunk', images[6
-]);
+ 
+for ( const sym of  SymbolList ){
+     img = await loadImageAsPromise(map, sym['icon']);
+
+     map.addImage(sym['id'], img )
+
+     idTrans[sym['name']] = sym['id'];
+}
 
 
 
@@ -930,8 +921,9 @@ map.addLayer({
        gfeature.features.forEach(function (feature) {
             fkind = feature.properties['kind'];
 
-            ad = "AED";
+            ad =  idTrans[fkind];
 
+            /*
             if ( fkind  == "AED" ) {
                 ad = "AED";
             } 
@@ -963,7 +955,7 @@ map.addLayer({
             } 
 
 
-
+*/
 
 
   
@@ -1036,6 +1028,7 @@ map.addSource(
 
 
 
+   
 
 
   })
