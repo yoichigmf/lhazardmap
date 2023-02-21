@@ -1,4 +1,3 @@
-
 function testGetGJSON(){
 
   var tg = GetFeaturesGeoJSON("シート1");
@@ -65,8 +64,8 @@ function GetFeaturesGeoJSON( sheetname ){
 
         }
 
-
-        if ( kind == "location") {
+        //if ( kind == "location") {
+        if ( 1) {
                console.log(userd);
       
 
@@ -112,7 +111,7 @@ function GetFeaturesGeoJSON( sheetname ){
 
 
                  var feature = { 
-                   　　　　　　　　id: arkey,
+                                id: arkey,
                                 type:'Feature',
                                 geometry:geom ,
                                 properties: prop };
@@ -129,9 +128,9 @@ function GetFeaturesGeoJSON( sheetname ){
 
                     var ukey = "";
 
-　　　　　　　　　　　　if ( array_key_exists( userd, uid_ar )) {
+                    if ( array_key_exists( userd, uid_ar )) {
 
-                  　　　　let ukeyd  = uid_ar[userd];
+                        let ukeyd  = uid_ar[userd];
                          ukey = userd  + "_" + ukeyd;
                   
                         }
