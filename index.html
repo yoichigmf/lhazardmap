@@ -923,40 +923,7 @@ map.addLayer({
 
             ad =  idTrans[fkind];
 
-            /*
-            if ( fkind  == "AED" ) {
-                ad = "AED";
-            } 
-
-            if ( fkind  == "コンビニ" ) {
-                ad = "conveni";
-            } 
-
-            if ( fkind  == "消火器" ) {
-                ad = "fire_extinguisher";
-            } 
-
-            if ( fkind  == "公衆電話" ) {
-                ad = "public_phone";
-            } 
-
-
-
-            if ( fkind  == "可搬ポンプ" ) {
-                ad = "pump";
-            } 
-
-            if ( fkind  == "防災倉庫・備蓄倉庫" ) {
-                ad = "warehouse";
-            } 
-
-            if ( fkind  == "応急給水タンク" ) {
-                ad = "water_tunk";
-            } 
-
-
-*/
-
+       
 
   
 
@@ -972,19 +939,6 @@ map.addLayer({
                                 }
       
                             );
-//https://github.com/yoichigmf/lhazardmap/blob/develop/icon/AED.png?raw=true
-
-//https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/AED.png
-
-//'https://raw.githubusercontent.com/yoichigmf/lbmap/511c8c3b03f785025f33c3e77ca313e72c1e737e/sprite/marker.png',
-//    調査ポイントのアイコン
-//map.loadImage(
- // 'https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/AED.png',
- //  function (error, image) {
-  //     if (error) throw error;
-     //  map.addImage('aed', image);
-
-
 
 
 
@@ -1002,9 +956,6 @@ map.addLayer({
    
 
 
-  //  }
-//);
-
 
 
        
@@ -1013,17 +964,6 @@ map.addLayer({
 
           }
 
-
-//    Spread Sheet中の調査ポイントを追加
-/*
-map.addSource( 
-        'rpoints', {
-        'type': 'geojson',
-         'data':GetFURL  
-        }
-
-);
-*/
 
 
 
@@ -1214,22 +1154,24 @@ return false;
 
 function  CreatePropertyHTML( prp ){
 
-  var rhtml = "<table><TR><TH>項目</TH><TH>値</TH></TR>";
+ // var rhtml = "<table><TR><TH>項目</TH><TH>値</TH></TR>";
+    var rhtml = "<table><TR><TH>登録情報</TH></TR>";
 
-
-
-  rhtml = rhtml + "<TR><TD>登録日時</TD><TD>";
+/*
+rhtml = rhtml + "<TR><TD>登録日時</TD><TD>";
 
 rhtml = rhtml + prp["date"];
 rhtml = rhtml + "</TD></TR>";
+*/
 
-rhtml = rhtml + "<TR><TD>種別</TD><TD>";
+rhtml = rhtml + "<TR><TD>";
+//rhtml = rhtml + "<TR><TD>種別</TD><TD>";
 
 rhtml = rhtml + prp["kind"];
 rhtml = rhtml + "</TD></TR>";
 
-
-rhtml = rhtml + "<TR><TD>テキスト</TD><TD>";
+// rhtml = rhtml + "<TR><TD>テキスト</TD><TD>";
+rhtml = rhtml + "<TR><TD>";
 
 rhtml = rhtml + prp["text"];
 rhtml = rhtml + "</TD></TR>";
@@ -1311,11 +1253,19 @@ function add_content (event) {
   var coordinates = event.lngLat;
   console.log('Lng:', coordinates.lng, 'Lat:', coordinates.lat);
 
-  formhtml = "<b>危険情報登録</b><br/><form  METHOD=\"GET\”  action=\"\"   enctype=\"multipart/form-data\" >";
+  formhtml = "<b>情報登録</b><br/><form  METHOD=\"GET\”  action=\"\"   enctype=\"multipart/form-data\" >";
+
+    formhtml = formhtml + "<select  name=\"kind\">";
+    formhtml = formhtml + "<option value=\"AED\">AED</option>";
+    formhtml = formhtml + "<option value=\"phone\">公衆電話</option>";
+    formhtml = formhtml + "</select>";
+
+
+
   formhtml = formhtml + "<input type=\"text\" name=\"stext\"  METHOD=\"GET\" />";
 
     
-  formhtml = formhtml + "<input type=\"file\" name=\"imgf\" ><br>";
+  //formhtml = formhtml + "<input type=\"file\" name=\"imgf\" ><br>";
     
   formhtml = formhtml + "<input type=\"submit\" value=\"登録\" onclick=\"commit(this.form)\">"
   formhtml = formhtml + "<input type=\"hidden\" name=\"lng\" value=\""  + coordinates.lng + "\"><input type=\"hidden\" name=\"lat\" value=\"" + coordinates.lat + "\"></form>";
