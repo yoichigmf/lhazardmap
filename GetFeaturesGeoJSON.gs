@@ -34,7 +34,7 @@ function GetFeaturesGeoJSON( sheetname ){
 
    if ( rows > 1){
 
-     for ( let ir = 1 ; ir < rows; ++ir ){
+     for ( let ir = 1 ; ir <= rows; ++ir ){
         let tgr = tgSheet.getRange(ir,1 ,1,8).getValues();
 
         //console.log( tgr );

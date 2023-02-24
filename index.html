@@ -669,9 +669,9 @@ function  GetSymbolsF( url ){
               } else {
                 var  gj = request.response;
       
-                gfeature = JSON.parse(gj);
+                gsym = JSON.parse(gj);
 
-              return gfeature;
+              return gsym;
               }
 
 
@@ -699,7 +699,7 @@ function  GetSymbolsF( url ){
   else {
     
  
-       dpurl = "https://script.google.com/macros/s/AKfycbz1p7jEFY-8DLg8r8tWiOA9lDySYtjhng7qgPJKbG_D2iVhmdfXkw9ae3bMtDuSIza7/exec";
+       dpurl = "https://script.google.com/macros/s/AKfycbx14Q6lE_28UAeH5LsHM3FYsiBBcsH6F5UOuUL65kvKBnFdNKfjRQGCfXOM7S-trSiTfg/exec";
   }
 
  var   GetFURL  = dpurl + "?cmd=GETFEATURS";
@@ -710,6 +710,7 @@ function  GetSymbolsF( url ){
 
 SymbolList = [];
 var  idTrans = {};
+var gfeature ;
 
 
 
@@ -759,7 +760,7 @@ map.addLayer({
 
   bottom_layer_id  = 'gsi_photo';
 
- 
+
 
  RasterLayers = [];
 
@@ -879,7 +880,7 @@ map.addLayer({
          SetDragScript();   //  動的に作成した要素に対するイベントは作成後に追加　　ドラッグイベントを追加
 
 
-         var gfeature ;
+     
 
     //console.log(JSON.stringify(RasterLayers));
         var request = new XMLHttpRequest();
@@ -918,7 +919,7 @@ map.addLayer({
       
        //    Spread Sheet中の調査ポイントを追加 
 
-       gfeature.features.forEach(function (feature) {
+       gfeature["features"].forEach(function (feature) {
             fkind = feature.properties['kind'];
 
             ad =  idTrans[fkind];
@@ -1256,8 +1257,15 @@ function add_content (event) {
   formhtml = "<b>情報登録</b><br/><form  METHOD=\"GET\”  action=\"\"   enctype=\"multipart/form-data\" >";
 
     formhtml = formhtml + "<select  name=\"kind\">";
-    formhtml = formhtml + "<option value=\"AED\">AED</option>";
-    formhtml = formhtml + "<option value=\"phone\">公衆電話</option>";
+
+    for ( const symb of  SymbolList  ){
+       
+        symname = symb["name"];
+        formhtml = formhtml + "<option value=\"" +  symname + "\">" + symname + "</option>";
+    //formhtml = formhtml + "<option value=\"phone\">公衆電話</option>";
+
+    }
+
     formhtml = formhtml + "</select>";
 
 
@@ -1267,7 +1275,7 @@ function add_content (event) {
     
   //formhtml = formhtml + "<input type=\"file\" name=\"imgf\" ><br>";
     
-  formhtml = formhtml + "<input type=\"submit\" value=\"登録\" onclick=\"commit(this.form)\">"
+  formhtml = formhtml + "<input type=\"submit\" value=\"登録\" onclick=\"docommit(this.form)\">"
   formhtml = formhtml + "<input type=\"hidden\" name=\"lng\" value=\""  + coordinates.lng + "\"><input type=\"hidden\" name=\"lat\" value=\"" + coordinates.lat + "\"></form>";
 
   popupv = new maplibregl.Popup({
@@ -1282,16 +1290,63 @@ function add_content (event) {
  // nmarker.setLngLat(coordinates).addTo(map);
 }
 
-function commit(form){
+function docommit(form){
   popupv.remove();
   console.log("commit");
   console.log( form.stext.value );
   console.log(form.lat.value );
+  console.log(form.kind.value );
 
   var cd = {"lng":form.lng.value,  "lat":form.lat.value};
 
+  // marker の選択
   //   レイヤにポイント追加するように改造必要  20221227
-  nmarker.setLngLat(cd).addTo(map);
+
+
+  let NewItem = {};
+
+  Object.assign(NewItem, gfeature["features"][0] );
+
+  let  prop = NewItem.properties;
+
+  let geom = NewItem.geometry;
+
+
+  geom["Type"] = "Point";
+  geom["coordinates"] = [];
+
+  geom["coordinates"].push(parseFloat(form.lng.value));
+  geom["coordinates"].push(parseFloat(form.lat.value));
+
+  prop["text"] = form.stext.value;
+  prop["kind"] = form.kind.value;
+
+  prop["user"] ="";
+  //prop["date"] = "";
+  //prop["proplist"] = [];
+  prop["url"] = "";
+
+
+  ad =  idTrans[form.kind.value];
+
+  prop['icon'] = ad;
+
+  NewItem["id"] = "_" + String(gfeature["features"].length + 2);
+
+  NewItem["type"] = "Feature";
+  NewItem["properties"] = prop;
+  NewItem["geometry"] = geom;
+
+
+  gfeature["features"].push(NewItem);
+  
+  
+
+  map.getSource('rpoints').setData(gfeature);
+
+  //gfeature["features"][0]["geometry"]["coordinates"];
+
+  //nmarker.setLngLat(cd).addTo(map);
 
 
    //google.script.run.withSuccessHandler(sample).AccountCheck();
@@ -1305,11 +1360,15 @@ function commit(form){
 
 //  GASの場合　GASで定義した addMessage という関数を実行している
 if ( GasMode == 1){
+ let tgSheet = "シート1";
  google.script.run
       .withSuccessHandler( successf )
       .withFailureHandler( failf )
-      .addMessage(form.stext.value, form.lat.value, form.lng.value); 
+      .addMessage( tgsheet, form.lat.value, form.lng.value, form.kind.value,  form.stext.value,); 
   //function  addMessage( text, lat, lon ){
+
+  }
+  else {
 
   }
   //  GASでない場合は　Postで登録できるようにしておく
