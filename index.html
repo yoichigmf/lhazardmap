@@ -1055,6 +1055,20 @@ function GetLegendHTML(){
 
     var  addlist = [];
 
+     wstr = " ";
+
+     for ( const sym of  SymbolList ){
+      leg_name = sym["name"];
+      leg_url  = sym["icon"];
+
+      tghtml = tghtml + "<TR><TD>";
+      tghtml = tghtml +  "<img src=\"" + leg_url + "\" " + wstr + "/>" + leg_name ;
+
+      tghtml = tghtml + "</TD></TR>";
+
+      }
+
+
 
     for ( const leg of  leg_list ){
 
