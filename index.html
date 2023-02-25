@@ -329,9 +329,11 @@ a{
   <!--  map click mode select  -->
   <div id="inputm">
 
+  <!---
   <form name="inputmf">
 	<input type="checkbox" onChange="ChangeMode()"  name="inputmode" />情報入力
  </form>
+-->
   </div>
 
 
@@ -1386,11 +1388,13 @@ function docommit(form){
 //  GASの場合　GASで定義した addMessage という関数を実行している
 if ( GasMode == 1){
  let tgSheet = "シート1";
+
+ /*
  google.script.run
       .withSuccessHandler( successf )
       .withFailureHandler( failf )
-      .addMessage( tgsheet, form.lat.value, form.lng.value, form.kind.value,  form.stext.value,); 
-  //function  addMessage( text, lat, lon ){
+      .addMessage( tgSheet, parseFloat(form.lat.value), parseFloat(form.lng.value), form.kind.value,  form.stext.value ); 
+  */
 
   }
   else {
