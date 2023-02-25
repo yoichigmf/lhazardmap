@@ -1046,7 +1046,7 @@ function updateLegendHtml(){//  凡例HTMLの更新
     }  
 
 
-// 
+// 　凡例表示用HTML作成
 function GetLegendHTML(){
 
    var tghtml = "<table>";
@@ -1054,6 +1054,29 @@ function GetLegendHTML(){
     let leg_list = GetLegendList();
 
     var  addlist = [];
+
+
+    //   ポイントシンボルの追加   2023.2.25
+   
+   //  wstr = "width=\"200\" ";
+
+     wstr = " ";
+
+     for ( const sym of  SymbolList ){
+      leg_name = sym["name"];
+      leg_url  = sym["icon"];
+
+      tghtml = tghtml + "<TR><TD>";
+      tghtml = tghtml +  "<img src=\"" + leg_url + "\" " + wstr + "/>" + leg_name ;
+
+      tghtml = tghtml + "</TD></TR>";
+
+      }
+
+
+
+  
+
 
 
     for ( const leg of  leg_list ){
@@ -1112,6 +1135,8 @@ function checkeaddList( legend , leglist){
 function GetLegendList() {
 
   var legend_array = [];
+
+
 
   for ( const rstl of  RasterLayers ){
      if ( rstl["display"] ==1 ){
