@@ -35,6 +35,15 @@ function onOpen() {
 
 }
 
+
+function  GetUserMailAddress(){
+    let mailAddress = Session.getActiveUser().getUserLoginId();
+
+    Logger.log( mailAddress );
+
+    return mailAddress;
+}
+
 function openMapUrl(){
   let html = '<h1>地図</h1><script>window.onload = function(){google.script.run.withSuccessHandler(function(url){window.open(url,"_blank");google.script.host.close();}).mapDisplayURL();}</script>';
   SpreadsheetApp.getUi().showModelessDialog(HtmlService.createHtmlOutput(html),"地図を開きます");
