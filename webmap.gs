@@ -63,6 +63,15 @@ function  mapDisplayURL(){
 
 }
 
+//   編集可能かどうか
+function  IsEditable() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
+  const range = sheet.getRange('B1:B10');
+  var editable = range.canEdit();
+
+  return editable;
+
+}
 
 function  getPropetySheet(){
 
@@ -1044,13 +1053,15 @@ function  addMessage( tgsheet, lat, lon, kind, text ){
   //　　書き込み対象シートを読み込み、最終行を取得
   const mySheet = getTargetSheet( tgsheet );
   const lastRow = mySheet.getLastRow() ;
+
+  const userId = GetUserMailAddress();
   // テキスト書き込み
  　//mySheet.getRange(1 + lastRow, 1).setValue(Utilities.formatDate(new Date(timestamp), 'JST', 'yyyy-MM-dd HH:mm:ss'));
 
   now = GetNow();
 
   mySheet.getRange(1 + lastRow, 1).setValue( now );
- // mySheet.getRange(1 + lastRow, 2).setValue(userId);
+  mySheet.getRange(1 + lastRow, 2).setValue(userId);
   mySheet.getRange(1 + lastRow, 3).setValue( kind );
 
   mySheet.getRange(1 + lastRow, 5).setValue(text);
