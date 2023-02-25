@@ -841,7 +841,7 @@ function doGet(e) {
 
     let tgText = e.parameter['stext'];
 
-    　let  tgsheet = e.parameter['sheet'] ? e.parameter['sheet']:false;
+    let  tgsheet = e.parameter['sheet'] ? e.parameter['sheet']:false;
 
      if ( tgsheet === false ){  //  シートの指定が無い場合
 　　　　　　tgsheet = "シート1";
@@ -851,7 +851,10 @@ function doGet(e) {
      let  lat = e.parameter['lat'];
      let  lon = e.parameter['lon'];
 
+     let kindTest = e.parameter['kind'];
 
+    //  指定シートにメッセージを追加する
+    addMessage( tgsheet, lat, lon, kind, kindText, tgText );
      //  deploy?cmd=PUTTEXT&lat={}&lon={}&stext={}
 
 
@@ -1013,13 +1016,25 @@ function GetNow(){
 
 }
 
-function  addMessage( text, lat, lon ){
+function testAddmessage()
+{
+  tgSheet = "シート1";
+  lat = 34.76129266;
+  lon = 134.0230465;
+  kind = "公衆電話";
+  text = "sample test";
+   addMessage( tgSheet, lat, lon, kind, text );
+   Logger.log("test");
+
+}
+
+function  addMessage( tgsheet, lat, lon, kind, text ){
 
   
 
   //　　書き込み対象シートを読み込み、最終行を取得
-  const mySheet = getTargetSheet();
-  const lastRow = mySheet.getLastRow();
+  const mySheet = getTargetSheet( tgsheet );
+  const lastRow = mySheet.getLastRow() ;
   // テキスト書き込み
  　//mySheet.getRange(1 + lastRow, 1).setValue(Utilities.formatDate(new Date(timestamp), 'JST', 'yyyy-MM-dd HH:mm:ss'));
 
@@ -1027,15 +1042,13 @@ function  addMessage( text, lat, lon ){
 
   mySheet.getRange(1 + lastRow, 1).setValue( now );
  // mySheet.getRange(1 + lastRow, 2).setValue(userId);
-  mySheet.getRange(1 + lastRow, 3).setValue("location");
-  //mySheet.getRange(1 + lastRow, 3).setValue(id);
+  mySheet.getRange(1 + lastRow, 3).setValue( kind );
+
   mySheet.getRange(1 + lastRow, 5).setValue(text);
 
-    mySheet.getRange(1 + lastRow, 6).setValue(lat);
+  mySheet.getRange(1 + lastRow, 6).setValue(lat);
   mySheet.getRange(1 + lastRow, 7).setValue(lon);
-  mySheet.getRange(1 + lastRow, 8).setValue('line');
-
-  //mySheet.getRange(1 + lastRow, 8).setValue('LINE');
+  
   return 0;
  
 

@@ -655,51 +655,51 @@ function getDefaultJsonHeaders() { return {
     'Content-Type': 'application/x-www-form-urlencoded',
 }}
 
-const loadSymbols = ( url ) => {
-     return new Promise((resolv,reject ) => {
+function  GetSymbolsF( url ){
 
-      //  SpreadSheetに定義したシンボルリストを設定する
+     //console.log(JSON.stringify(RasterLayers));
+     var request = new XMLHttpRequest();
+        request.open("GET", url, false);
 
-      const data = {
+        try {
+        request.send();
 
-      };
+        if (request.status != 200) {
+             alert(`Error ${request.status}: ${request.statusText}`);
+              } else {
+                var  gj = request.response;
+      
+                gsym = JSON.parse(gj);
 
-      fetch(url, {
-          method: "GET",
-          headers: {
-          "Accept": 'application/json',
-          "Content-Type": 'application/x-www-form-urlencoded'
-          },
-          mode: "cors"
-           })
-       .then(response => {
-             if (response.ok) {
-             return response.json();
-             }
-         // 404 や 500 ステータスならここに到達する
-          throw new Error('Network response was not ok.');
-           })
-          .then(retJson => {
-
-            return retJson
-          })
+              return gsym;
+              }
 
 
 
-     });
-};
+        }
+        catch( err ){
+          alert("request failed");
+        }
+      
+    
+      
+
+
+
+}
+
 
 
 //map.on('load', function () {
 
   var  dpurl;
   if ( GasMode == 1 ){
-       //  dpurl = <?= GetDeployURL(); ?>;
+         dpurl = <?= GetDeployURL(); ?>;
     }
   else {
     
  
-       dpurl = "";""
+       dpurl = "";
   }
 
  var   GetFURL  = dpurl + "?cmd=GETFEATURS";
@@ -708,36 +708,28 @@ const loadSymbols = ( url ) => {
 
  var   GetSymbols = dpurl + "?cmd=SYMBOLS";
 
+SymbolList = [];
+var  idTrans = {};
+var gfeature ;
+
 
 
 map.once('load', async () => {
 
- // const symboljson = await Promise.all ([
- // loadSymbols(GetSymbols )
-//]
-//);
+
+  //   シンボルの定義をSpread Sheetから読み込んで配列に格納する
 
 
-// Icons by https://icons8.com/
-const images = await Promise.all([
-    loadImageAsPromise(map, 'https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/AED.png'),
-    loadImageAsPromise(map, 'https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/conveni.png'),
-    loadImageAsPromise(map, 'https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/fire_extinguisher.png'),
-    loadImageAsPromise(map, 'https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/public_phone.png'),
-    loadImageAsPromise(map, 'https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/pump.png'),
-    loadImageAsPromise(map, 'https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/warehouse.png'),
-    loadImageAsPromise(map, 'https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/water_tunk.png')
-  ]);
+SymbolList = await GetSymbolsF( GetSymbols );
 
-  
-map.addImage('AED', images[0]);
-map.addImage('conveni', images[1]);
-map.addImage('fire_extinguisher', images[2]);
-map.addImage('public_phone', images[3]);
-map.addImage('pump', images[4]);
-map.addImage('warehouse', images[5]);
-map.addImage('water_tunk', images[6
-]);
+ 
+for ( const sym of  SymbolList ){
+     img = await loadImageAsPromise(map, sym['icon']);
+
+     map.addImage(sym['id'], img )
+
+     idTrans[sym['name']] = sym['id'];
+}
 
 
 
@@ -768,7 +760,7 @@ map.addLayer({
 
   bottom_layer_id  = 'gsi_photo';
 
- 
+
 
  RasterLayers = [];
 
@@ -888,7 +880,7 @@ map.addLayer({
          SetDragScript();   //  動的に作成した要素に対するイベントは作成後に追加　　ドラッグイベントを追加
 
 
-         var gfeature ;
+     
 
     //console.log(JSON.stringify(RasterLayers));
         var request = new XMLHttpRequest();
@@ -927,44 +919,12 @@ map.addLayer({
       
        //    Spread Sheet中の調査ポイントを追加 
 
-       gfeature.features.forEach(function (feature) {
+       gfeature["features"].forEach(function (feature) {
             fkind = feature.properties['kind'];
 
-            ad = "AED";
+            ad =  idTrans[fkind];
 
-            if ( fkind  == "AED" ) {
-                ad = "AED";
-            } 
-
-            if ( fkind  == "コンビニ" ) {
-                ad = "conveni";
-            } 
-
-            if ( fkind  == "消火器" ) {
-                ad = "fire_extinguisher";
-            } 
-
-            if ( fkind  == "公衆電話" ) {
-                ad = "public_phone";
-            } 
-
-
-
-            if ( fkind  == "可搬ポンプ" ) {
-                ad = "pump";
-            } 
-
-            if ( fkind  == "防災倉庫・備蓄倉庫" ) {
-                ad = "warehouse";
-            } 
-
-            if ( fkind  == "応急給水タンク" ) {
-                ad = "water_tunk";
-            } 
-
-
-
-
+       
 
   
 
@@ -980,19 +940,6 @@ map.addLayer({
                                 }
       
                             );
-//https://github.com/yoichigmf/lhazardmap/blob/develop/icon/AED.png?raw=true
-
-//https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/AED.png
-
-//'https://raw.githubusercontent.com/yoichigmf/lbmap/511c8c3b03f785025f33c3e77ca313e72c1e737e/sprite/marker.png',
-//    調査ポイントのアイコン
-//map.loadImage(
- // 'https://raw.githubusercontent.com/yoichigmf/lhazardmap/develop/icon/AED.png',
- //  function (error, image) {
-  //     if (error) throw error;
-     //  map.addImage('aed', image);
-
-
 
 
 
@@ -1010,9 +957,6 @@ map.addLayer({
    
 
 
-  //  }
-//);
-
 
 
        
@@ -1022,20 +966,10 @@ map.addLayer({
           }
 
 
-//    Spread Sheet中の調査ポイントを追加
-/*
-map.addSource( 
-        'rpoints', {
-        'type': 'geojson',
-         'data':GetFURL  
-        }
-
-);
-*/
 
 
 
-
+   
 
 
   })
@@ -1221,22 +1155,24 @@ return false;
 
 function  CreatePropertyHTML( prp ){
 
-  var rhtml = "<table><TR><TH>項目</TH><TH>値</TH></TR>";
+ // var rhtml = "<table><TR><TH>項目</TH><TH>値</TH></TR>";
+    var rhtml = "<table><TR><TH>登録情報</TH></TR>";
 
-
-
-  rhtml = rhtml + "<TR><TD>登録日時</TD><TD>";
+/*
+rhtml = rhtml + "<TR><TD>登録日時</TD><TD>";
 
 rhtml = rhtml + prp["date"];
 rhtml = rhtml + "</TD></TR>";
+*/
 
-rhtml = rhtml + "<TR><TD>種別</TD><TD>";
+rhtml = rhtml + "<TR><TD>";
+//rhtml = rhtml + "<TR><TD>種別</TD><TD>";
 
 rhtml = rhtml + prp["kind"];
 rhtml = rhtml + "</TD></TR>";
 
-
-rhtml = rhtml + "<TR><TD>テキスト</TD><TD>";
+// rhtml = rhtml + "<TR><TD>テキスト</TD><TD>";
+rhtml = rhtml + "<TR><TD>";
 
 rhtml = rhtml + prp["text"];
 rhtml = rhtml + "</TD></TR>";
@@ -1318,13 +1254,28 @@ function add_content (event) {
   var coordinates = event.lngLat;
   console.log('Lng:', coordinates.lng, 'Lat:', coordinates.lat);
 
-  formhtml = "<b>危険情報登録</b><br/><form  METHOD=\"GET\”  action=\"\"   enctype=\"multipart/form-data\" >";
+  formhtml = "<b>情報登録</b><br/><form  METHOD=\"GET\”  action=\"\"   enctype=\"multipart/form-data\" >";
+
+    formhtml = formhtml + "<select  name=\"kind\">";
+
+    for ( const symb of  SymbolList  ){
+       
+        symname = symb["name"];
+        formhtml = formhtml + "<option value=\"" +  symname + "\">" + symname + "</option>";
+    //formhtml = formhtml + "<option value=\"phone\">公衆電話</option>";
+
+    }
+
+    formhtml = formhtml + "</select>";
+
+
+
   formhtml = formhtml + "<input type=\"text\" name=\"stext\"  METHOD=\"GET\" />";
 
     
-  formhtml = formhtml + "<input type=\"file\" name=\"imgf\" ><br>";
+  //formhtml = formhtml + "<input type=\"file\" name=\"imgf\" ><br>";
     
-  formhtml = formhtml + "<input type=\"submit\" value=\"登録\" onclick=\"commit(this.form)\">"
+  formhtml = formhtml + "<input type=\"submit\" value=\"登録\" onclick=\"docommit(this.form)\">"
   formhtml = formhtml + "<input type=\"hidden\" name=\"lng\" value=\""  + coordinates.lng + "\"><input type=\"hidden\" name=\"lat\" value=\"" + coordinates.lat + "\"></form>";
 
   popupv = new maplibregl.Popup({
@@ -1339,16 +1290,63 @@ function add_content (event) {
  // nmarker.setLngLat(coordinates).addTo(map);
 }
 
-function commit(form){
+function docommit(form){
   popupv.remove();
   console.log("commit");
   console.log( form.stext.value );
   console.log(form.lat.value );
+  console.log(form.kind.value );
 
   var cd = {"lng":form.lng.value,  "lat":form.lat.value};
 
+  // marker の選択
   //   レイヤにポイント追加するように改造必要  20221227
-  nmarker.setLngLat(cd).addTo(map);
+
+
+  let NewItem = {};
+
+  Object.assign(NewItem, gfeature["features"][0] );
+
+  let  prop = NewItem.properties;
+
+  let geom = NewItem.geometry;
+
+
+  geom["Type"] = "Point";
+  geom["coordinates"] = [];
+
+  geom["coordinates"].push(parseFloat(form.lng.value));
+  geom["coordinates"].push(parseFloat(form.lat.value));
+
+  prop["text"] = form.stext.value;
+  prop["kind"] = form.kind.value;
+
+  prop["user"] ="";
+  //prop["date"] = "";
+  //prop["proplist"] = [];
+  prop["url"] = "";
+
+
+  ad =  idTrans[form.kind.value];
+
+  prop['icon'] = ad;
+
+  NewItem["id"] = "_" + String(gfeature["features"].length + 2);
+
+  NewItem["type"] = "Feature";
+  NewItem["properties"] = prop;
+  NewItem["geometry"] = geom;
+
+
+  gfeature["features"].push(NewItem);
+  
+  
+
+  map.getSource('rpoints').setData(gfeature);
+
+  //gfeature["features"][0]["geometry"]["coordinates"];
+
+  //nmarker.setLngLat(cd).addTo(map);
 
 
    //google.script.run.withSuccessHandler(sample).AccountCheck();
@@ -1362,11 +1360,15 @@ function commit(form){
 
 //  GASの場合　GASで定義した addMessage という関数を実行している
 if ( GasMode == 1){
+ let tgSheet = "シート1";
  google.script.run
       .withSuccessHandler( successf )
       .withFailureHandler( failf )
-      .addMessage(form.stext.value, form.lat.value, form.lng.value); 
-  //function  addMessage( text, lat, lon ){
+      .addMessage( tgSheet, parseFloat(form.lat.value), parseFloat(form.lng.value), form.kind.value,  form.stext.value ); 
+  
+
+  }
+  else {
 
   }
   //  GASでない場合は　Postで登録できるようにしておく
@@ -1375,7 +1377,15 @@ if ( GasMode == 1){
   return true;
 }
 
-function successf(){
+//   GAS　登録成功
+function successf( tgSheet ){
+
+　 google.script.run
+      .withSuccessHandler( successGeoJSON )
+      .withFailureHandler( failf )
+      .GetFeaturesGeoJSON( tgSheet ); 
+
+　　
   console.log("success");
 
 }
@@ -1384,6 +1394,14 @@ function failf(){
 
 }
 
+function successGeoJSON( tGeoJson ){
+
+   //alert( tGeoJson );
+
+    console.log( tGeoJson );
+
+    console.log("geoJson success");
+}
 
 //     レイヤ表示のチェック変更
 function  changeCheck( check  ){

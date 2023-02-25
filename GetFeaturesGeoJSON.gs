@@ -3,6 +3,8 @@ function testGetGJSON(){
 
   var tg = GetFeaturesGeoJSON("シート1");
 
+   console.log( tg );
+
   let js = JSON.stringify( tg );
 
   console.log( js );
@@ -35,7 +37,7 @@ function GetFeaturesGeoJSON( sheetname ){
 
    if ( rows > 1){
 
-     for ( let ir = 1 ; ir < rows; ++ir ){
+     for ( let ir = 2 ; ir <= rows; ++ir ){
         let tgr = tgSheet.getRange(ir,1 ,1,8).getValues();
 
         //console.log( tgr );
