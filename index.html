@@ -419,8 +419,21 @@ a{
   //   編集可能かどうか
   var  Editable = 0;
 
+  var UserID = "";
+  var XPOS = "";
+  var YPOS ="";
+  var ZOOM = "";
+
+
+
 　if ( GasMode == 1 ){
   
+     UserID = <?=userid ?>;
+
+     XPOS = <?=XPOS ?>;
+     YPOS = <?=YPOS ?>;
+     ZOOM = <?=ZOOM ?>;
+
 
   }
 
@@ -625,16 +638,19 @@ function toggleSidebar(id) {
   elem.className = classes.join(' ');
 }
 
-tstyle =  'https://raw.githubusercontent.com/gsi-cyberjapan/optimal_bvmap/main/style/skeleton.json'
+tstyle =  'https://raw.githubusercontent.com/gsi-cyberjapan/optimal_bvmap/main/style/skeleton.json';
 
-stdstyle =  'https://raw.githubusercontent.com/gsi-cyberjapan/gsivectortile-mapbox-gl-js/master/std.json'
+stdstyle =  'https://raw.githubusercontent.com/gsi-cyberjapan/gsivectortile-mapbox-gl-js/master/std.json';
+
+ // center: [134.0188, 34.755387],  
+ // zoom: 15,
 
 var map = new maplibregl.Map({
   container: 'map',
   hash: true,
   style: stdstyle , //style.jsonへのパス
-  center: [134.0188, 34.755387],  
-  zoom: 15,
+  center: [XPOS,YPOS],  
+  zoom: ZOOM,
   maxZoom: 17.99,
   minZoom: 4,
   localIdeographFontFamily: false
@@ -885,12 +901,14 @@ map.addLayer({
          //var  lgp = document.getElementById("llist");
          lgp.innerHTML =  ihtml ;
          console.log(ihtml);
-         SetDragScript();   //  動的に作成した要素に対するイベントは作成後に追加　　ドラッグイベントを追加
+         //SetDragScript();   //  動的に作成した要素に対するイベントは作成後に追加　　ドラッグイベントを追加
 
 
      
 
     //console.log(JSON.stringify(RasterLayers));
+
+
         var request = new XMLHttpRequest();
         request.open("GET", GetFURL, true);
         request.send();
@@ -927,18 +945,18 @@ map.addLayer({
       
        //    Spread Sheet中の調査ポイントを追加 
 
-       gfeature["features"].forEach(function (feature) {
-            fkind = feature.properties['kind'];
+            gfeature["features"].forEach(function (feature) {
+                           fkind = feature.properties['kind'];
 
-            ad =  idTrans[fkind];
+                           ad =  idTrans[fkind];
 
        
 
   
 
-            feature.properties['icon'] = ad;
+                           feature.properties['icon'] = ad;
 
-       });
+                });
 
 
        map.addSource( 
@@ -1360,11 +1378,11 @@ function docommit(form){
   NewItem["geometry"] = geom;
 
 
-  gfeature["features"].push(NewItem);
+
   
   
 
-  map.getSource('rpoints').setData(gfeature);
+  
 
   //gfeature["features"][0]["geometry"]["coordinates"];
 
@@ -1384,9 +1402,9 @@ function docommit(form){
 if ( GasMode == 1){
  let tgSheet = "シート1";
  google.script.run
-      .withSuccessHandler( successf )
+      .withSuccessHandler( successf(tgSheet, NewItem) )
       .withFailureHandler( failf )
-      .addMessage( tgSheet, parseFloat(form.lat.value), parseFloat(form.lng.value), form.kind.value,  form.stext.value ); 
+      .addMessage( tgSheet, parseFloat(form.lat.value), parseFloat(form.lng.value), form.kind.value,  form.stext.value ,  UserID); 
   
 
   }
@@ -1400,19 +1418,45 @@ if ( GasMode == 1){
 }
 
 //   GAS　登録成功
-function successf( tgSheet ){
+function successf( tgSheet, NewItem ){
+  
+  gfeature["features"].push(NewItem);
+　map.getSource('rpoints').setData(gfeature);
+  console.log("success");
+
 
 　 google.script.run
-      .withSuccessHandler( successGeoJSON )
-      .withFailureHandler( failf )
+      .withSuccessHandler(function(geoJ){
+
+           // if ( geoJ ){
+
+              let gjp = JSON.stringify( geoJ );
+               console.log(gjp);
+          //  }
+          //  else {
+          //    console.log("NULL geoJ");
+          //  }
+
+            console.log("geoJson success");
+
+      } )
+      .withFailureHandler( failf2 )
       .GetFeaturesGeoJSON( tgSheet ); 
 
-　　
-  console.log("success");
+　
 
 }
 function failf(){
+
+   alert("権限が無いのでデータ登録できません");
    console.log("fail");
+
+}
+
+function failf2(){
+
+  // alert("権限が無いのでデータ登録できません");
+   console.log("fail geojson");
 
 }
 

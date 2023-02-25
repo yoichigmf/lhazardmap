@@ -45,24 +45,77 @@ function  GetUserMailAddress(){
 }
 
 function openMapUrl(){
+ 
+  
   let html = '<h1>地図</h1><script>window.onload = function(){google.script.run.withSuccessHandler(function(url){window.open(url,"_blank");google.script.host.close();}).mapDisplayURL();}</script>';
   SpreadsheetApp.getUi().showModelessDialog(HtmlService.createHtmlOutput(html),"地図を開きます");
 }
+
+
+function TestMD5(){
+
+  let md = MD5("yypppp");
+
+   Logger.log( md );
+}
+
+function MD5(input) {
+  var rawHash = Utilities.computeDigest(Utilities.DigestAlgorithm.MD5, input, Utilities.Charset.UTF_8);
+  var txtHash = '';
+  for (i = 0; i < rawHash.length; i++) {
+    var hashVal = rawHash[i];
+    if (hashVal < 0) {
+      hashVal += 256;
+    }
+    if (hashVal.toString(16).length == 1) {
+      txtHash += '0';
+    }
+    txtHash += hashVal.toString(16);
+  }
+  return txtHash;
+}
+
+
+
+ // HMAC SHA 256ハッシュ化
+const convertToHMmacSHA256 = (text, SECRET_KEY) => {
+  const rowHash = Utilities.computeHmacSignature(Utilities.MacAlgorithm.HMAC_SHA_256, text, SECRET_KEY);
+  let txtHash = '';
+  for (i = 0; i < rowHash.length; i++) {
+    let hashVal = rowHash[i];
+    if (hashVal < 0) {
+      hashVal += 256;
+    }
+    if (hashVal.toString(16).length == 1) {
+      txtHash += '0';
+    }
+    txtHash += hashVal.toString(16);
+  }
+  return txtHash;
+}
+
+
+
 
 
 function  mapDisplayURL(){
 
     var curl = GetDeployURL();
 
-    var url = curl + "?cmd=MAP";
+    let  userid =  MD5(GetUserMailAddress());
+  //let  mapv = HtmlService.createTemplateFromFile('index.html');
 
+    var loc = GetLocationParam();
 
+    var url = curl + "?cmd=MAP&"+ loc +"&USERID="+userid;
+
+    console.log( url );
   
     return url;
 
 
 }
-
+ 
 //   編集可能かどうか
 function  IsEditable() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
@@ -81,6 +134,16 @@ function  getPropetySheet(){
    return tgSheet;
 }
 
+
+function getUserListSheet(){
+
+   let tgSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('#users');
+
+   //console.log( tgSheet);
+   return tgSheet;
+}
+
+
 //  シート１を取得
 function  getFirstSheet(){
 
@@ -93,6 +156,9 @@ function  getFirstSheet(){
 function getUuid() {
   return Utilities.getUuid();
 }
+
+
+
 
 //   書き込み対象シートを取得
 function  getTargetSheet(){
@@ -125,13 +191,40 @@ function GetDeployURL(){
 
   var pSheet = getPropetySheet();
 
-   var webapps = pSheet.getRange(7, 2).getValue();
+   var webapps = pSheet.getRange(1, 2).getValue();
 
 // var webapps = ScriptApp.getService().getUrl();
 
  return webapps;
 
 }
+
+//   デフォルト位置URLを返す   手動で設定することにした
+function GetLocationParam(){
+
+  var pSheet = getPropetySheet();
+
+   var x= pSheet.getRange( 2, 2).getValue();
+   var y = pSheet.getRange( 2, 3).getValue();
+   var z = pSheet.getRange( 3, 2).getValue();
+
+// var webapps = ScriptApp.getService().getUrl();
+
+  var   gurl = "XPOS=" + String(x)　+ "&YPOS=" + String(y) + "&ZOOM=" + String(z);
+
+  //console.log( gurl );
+  return  gurl;
+
+
+
+}
+
+
+
+
+
+
+
 
  function send2dropbox(file) {
   var dropboxTOKEN =  DROPBOX_TOKEN ;
@@ -586,6 +679,7 @@ function  recordMov(username, timestamp, fileurl, event){
 
 
 
+
 //この関数の中にクエリパラメータを配列形式で設定する
 //idがない場合は下記載の配列からidを消す
 //id= のように空の場合のテストをしたい場合id:'' にする
@@ -655,6 +749,33 @@ function testRastL(){
 
   　space = 2;
     console.log( JSON.stringify( rlayers, null,space ));
+}
+
+
+//  ハッシュされた指定ユーザ名が書き込み許可リストにはいっているかどうかチェックする
+function  GetUserID( hashstr  ){
+
+  let usheet =  getUserListSheet();
+  const lastRow = usheet.getLastRow();
+ 
+  if ( lastRow  > 1){
+       for ( let ir = 2 ; ir <= lastRow ; ++ir ){
+          let tgr = usheet.getRange(ir,1 ,1,2).getValues();
+
+          let hashname = MD5( tgr[0][0]);
+
+          if ( hashname == hashstr ){
+               return   tgr[0][0];
+          }
+
+       }
+
+  }
+  
+  return null;
+
+  
+　　　
 }
 
 function GetRasterLayers(){
@@ -805,7 +926,7 @@ function doGet(e) {
   console.log(e.parameter['cmd']);
 
 
-  
+
 
   let  CMD = e.parameter['cmd'];
 
@@ -918,9 +1039,22 @@ function doGet(e) {
   }
   else if (CMD.toUpperCase() == 'MAP'){
 
+    
+   let userid = e.parameter['USERID'];
+   let XPOS = e.parameter['XPOS'];
+   let YPOS = e.parameter['YPOS'];
+   let ZOOM = e.parameter['ZOOM'];
 
 
-   var htmlOutput = HtmlService.createTemplateFromFile("index").evaluate();
+
+
+   var htms = HtmlService.createTemplateFromFile("index");
+   htms.userid = userid ;
+   htms.XPOS = XPOS ;
+   htms.YPOS = YPOS ;
+   htms.ZOOM = ZOOM ;
+
+   var htmlOutput = htms.evaluate();
 
      htmlOutput
     .setTitle("地図表示")
@@ -1046,22 +1180,28 @@ function testAddmessage()
 
 }
 
-function  addMessage( tgsheet, lat, lon, kind, text ){
+
+function  addMessage( tgsheet, lat, lon, kind, text, userid ){
 
   
+  //  指定されたハッシュ文字列のユーザが　 #users シートにあるかどうかチェック
+　let nuser = GetUserID(  userid   );
 
+  if ( nuser == null ){
+    throw new Error('ユーザに書き込み権限がありません');
+  }
   //　　書き込み対象シートを読み込み、最終行を取得
   const mySheet = getTargetSheet( tgsheet );
   const lastRow = mySheet.getLastRow() ;
 
-  const userId = GetUserMailAddress();
+  //const userId = GetUserMailAddress();
   // テキスト書き込み
  　//mySheet.getRange(1 + lastRow, 1).setValue(Utilities.formatDate(new Date(timestamp), 'JST', 'yyyy-MM-dd HH:mm:ss'));
 
   now = GetNow();
 
   mySheet.getRange(1 + lastRow, 1).setValue( now );
-  mySheet.getRange(1 + lastRow, 2).setValue(userId);
+  mySheet.getRange(1 + lastRow, 2).setValue( nuser );
   mySheet.getRange(1 + lastRow, 3).setValue( kind );
 
   mySheet.getRange(1 + lastRow, 5).setValue(text);
