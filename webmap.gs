@@ -918,6 +918,84 @@ return gjson;
 
 }
 
+//   位置情報構造JSONの取得
+function  GetLocationJson(){
+
+ var pSheet = getPropetySheet();
+
+   var loc1  = pSheet.getRange( 4, 2).getValue();
+   var loc2  = pSheet.getRange( 4, 3).getValue();
+
+
+  var  retJ = [];
+
+　var  json1 = GetJsonFromSheet( loc1 );
+
+  if ( json1 ){
+    retJ.push( json1);
+  }
+  
+  var  json2 = GetJsonFromSheet( loc2 );
+
+  if ( json2 ){
+    retJ.push( json2 );
+  }
+
+  console.log( retJ );
+  return retJ;
+  
+}
+
+
+function GetJsonFromSheet( sheetname ){
+   let tgSheet =  SpreadsheetApp.getActiveSpreadsheet().getSheetByName( sheetname );
+
+   const rows = tgSheet.getLastRow(); 
+
+  let  rjson = [];
+
+   const  columns = tgSheet.getLastColumn();
+
+
+  if ( rows > 1){
+
+
+   
+    let hd = [];
+    for ( let ip = 1; ip <= columns; ++ip ) {
+        let tname =   tgSheet.getRange(1, ip ).getValue();
+
+        hd.push( tname );
+      }
+
+  
+    for ( let ic = 2; ic <= rows; ++ic  ){
+      let  nline =  {};
+
+      for ( let ip = 1 ; ip <= columns; ++ip ){
+           let nv =   tgSheet.getRange( ic, ip ).getValue();
+
+           nline[hd[ip-1]] = nv;
+
+      }
+
+      rjson.push( nline );
+
+    }
+      
+
+
+
+    return rjson;
+
+  }
+  else {
+      return null;
+  }
+
+
+
+}
 
 function doGet(e) {
  //パラメータをログに出力してみる。
@@ -956,6 +1034,19 @@ function doGet(e) {
 
   }
 
+  else if (CMD.toUpperCase() == 'GETLOCATION'){
+    //   地物の取得
+
+
+     let locJson = GetLocationJson();
+
+　
+　　　space = 2;
+     console.log( JSON.stringify( locJson, null,space ));
+
+     return ContentService.createTextOutput(JSON.stringify( locJson, null, space  )).setMimeType(ContentService.MimeType.JSON);
+
+  }
 
   else if (CMD.toUpperCase() == 'GETFEATURS'){
     //   地物の取得
