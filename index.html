@@ -658,7 +658,7 @@ function getDefaultJsonHeaders() { return {
     'Content-Type': 'application/x-www-form-urlencoded',
 }}
 
-function  GetSymbolsF( url ){
+function  GetSymbolsF_old( url ){
 
      //console.log(JSON.stringify(RasterLayers));
      var request = new XMLHttpRequest();
@@ -683,13 +683,31 @@ function  GetSymbolsF( url ){
         catch( err ){
           alert("request failed");
         }
-      
-    
-      
-
 
 
 }
+
+
+
+async function  GetSymbolsF( url ){
+
+
+       let response = await fetch(url);
+
+       if (response.ok) { // HTTP ステータスが 200-299 の場合
+  // レスポンスの本文を取得(後述)
+       let json = await response.json();
+
+          return json;
+      } else {
+           alert("HTTP-Error: " + response.status);
+
+           return null;
+      }
+
+
+}
+
 
 
 
@@ -702,7 +720,7 @@ function  GetSymbolsF( url ){
   else {
     
  
-       dpurl = "https://script.google.com/macros/s/AKfycbx14Q6lE_28UAeH5LsHM3FYsiBBcsH6F5UOuUL65kvKBnFdNKfjRQGCfXOM7S-trSiTfg/exec";
+       dpurl = "https://script.google.com/macros/s/AKfycbxLmLP8bWDspXHvxXW-B3m2reeGWPtWazpsF-k94R3y0LAikmN3iO2Vr7aFSQf5S6Im_g/exec";
   }
 
  var   GetFURL  = dpurl + "?cmd=GETFEATURS";
