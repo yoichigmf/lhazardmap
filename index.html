@@ -824,8 +824,8 @@ map.addLayer({
                });
 
             
-          lyname = "ly" + nc;
-          console.log( lyname + " " + rstl["name"]);
+        lyname = "ly" + nc;
+        //console.log( lyname + " " + rstl["name"]);
 
          rstl["layer_id"] = lyname;
 
@@ -852,7 +852,7 @@ map.addLayer({
               });
              // map.setLayoutProperty('point_sample', 'visibility', 'none');
            ++nc;
-         }
+         }   //    end of for ( const rstl of  RasterLayers ) loop
 
 
          //  ラスタレイヤリストを反転させてチェックボックスリストにする　
@@ -866,30 +866,22 @@ map.addLayer({
          for ( const rstl of  rvlay  ){
 
 
-            chkstr = " ";
-            if ( rstl["display"] == 1){
-              chkstr = " checked=\"checked\" ";
+               chkstr = " ";
+               if ( rstl["display"] == 1){
+                  chkstr = " checked=\"checked\" ";
 
-            }
+               }
 
-            idc = "idn" + idv;
+               idc = "idn" + idv;
 
-            var rlayerid = rstl["layer_id"] ;
+                var rlayerid = rstl["layer_id"] ;
 
             
-             ihtml = ihtml  + "<li draggable=\"false\"   id=\"" +  idc + "\"  name=\"" + rlayerid + 
+               ihtml = ihtml  + "<li draggable=\"false\"   id=\"" +  idc + "\"  name=\"" + rlayerid + 
                 "\"></a><input type=\"checkbox\" onChange=\"changeCheck( this )\"      id=\"" + rlayerid + "\""  + chkstr + " /> <label     for=\"" + rlayerid  + "\" >" + rstl["name"] + "</label></li>"; 
 
-              
-
-           // ihtml = ihtml  + "<li draggable=\"false\" oncontextmenu=\"openPopup( this )\"  id=\"" +  idc + "\"  name=\"" + rlayerid + 
-            //  "\"></a><input type=\"checkbox\" onChange=\"changeCheck( this )\"      id=\"" + rlayerid + "\""  + chkstr + " /> <label     for=\"" + rlayerid  + "\" >" + rstl["name"] + "</label></li>"; 
-
-              
-
-             // changeCheck( check, id  ){
-            ++idv;
-         }
+              ++idv;
+         }     //  end of for ( const rstl of  rvlay  ) loop 
 
          ihtml = ihtml + "<li draggable=\"false\"  style=\"border:0;list-style-type:none;\">&nbsp;</li></ul>"
 
@@ -897,13 +889,10 @@ map.addLayer({
 
          //var  lgp = document.getElementById("llist");
          lgp.innerHTML =  ihtml ;
-         console.log(ihtml);
-         SetDragScript();   //  動的に作成した要素に対するイベントは作成後に追加　　ドラッグイベントを追加
+       //  console.log(ihtml);
+        // SetDragScript();   //  動的に作成した要素に対するイベントは作成後に追加　　ドラッグイベントを追加
 
-
-     
-
-    //console.log(JSON.stringify(RasterLayers));
+/*
         var request = new XMLHttpRequest();
         request.open("GET", GetFURL, true);
         request.send();
@@ -933,25 +922,22 @@ map.addLayer({
       
               }
               else {
-              navigator.geolocation.getCurrentPosition(pos_success,pos_fail);
+                   navigator.geolocation.getCurrentPosition(pos_success,pos_fail);
               }
-             }
+             }      //  地物があるか
+
       
       
-       //    Spread Sheet中の調査ポイントを追加 
+           //       icon   id の追加
 
-       gfeature["features"].forEach(function (feature) {
-            fkind = feature.properties['kind'];
+           gfeature["features"].forEach(function (feature) {
+                   fkind = feature.properties['kind'];
 
-            ad =  idTrans[fkind];
+                    ad =  idTrans[fkind];
 
-       
+                   feature.properties['icon'] = ad;
 
-  
-
-            feature.properties['icon'] = ad;
-
-       });
+             });
 
 
        map.addSource( 
@@ -961,11 +947,6 @@ map.addLayer({
                                 }
       
                             );
-
-
-
-
-
        map.addLayer({
             'id': 'points',
             'type': 'symbol',
@@ -974,30 +955,17 @@ map.addLayer({
             'icon-image': ['get', 'icon'],
             'icon-size': 0.7
                    }
-      });
-   
-
-
-
-
-       
-     
-
-
-          }
-
-
-
-
-
-   
-
-
+              });
+          }  //   request.onload = function() {   //onload
+   */
   })
   .catch(error => {
     // ネットワークエラーの場合はここに到達する
     console.error(error);
-  })
+  })     //ラスタレイヤの読み込み
+
+
+
 
   //  右ボタンメニュー制御
   //document.oncontextmenu = function () {return false;}
