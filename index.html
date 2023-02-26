@@ -18,9 +18,19 @@ body { margin:0; padding:0; }
   width: 100%;
 }
 
+
+#location-selecter {
+  position: absolute;
+        top: 60px;
+        left: 20px;
+        background: rgba(255, 255, 255, 0);
+        z-index:255;
+
+}
+
 #basemaps-selecter {
         position: absolute;
-        top: 60px;
+        top: 110px;
         left: 20px;
         background: rgba(255, 255, 255, 0);
         z-index:255;
@@ -49,7 +59,7 @@ body { margin:0; padding:0; }
 
 #displayTablechk{
         position: absolute;
-        top: 80px;
+        top: 150px;
         left: 20px;
         background: rgba(255, 255, 255, 0);
         z-index:255;
@@ -132,7 +142,7 @@ font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
     font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
     font-weight: 400;
     position: absolute;
-    top: 80px;
+    top: 110px;
     left: 5px;
     bottom:3px;
     z-index: 1;
@@ -367,6 +377,32 @@ a{
 
 
     <div id="right"   class="sidebar flex-center right collapsed">
+
+    <div id="location-selecter"  >
+
+      <form name="locform">
+      <table>
+        <tr><td>旧町名</td>
+
+          <td>
+         <select id="loc1"  onchange="locationchange1(this);">
+         </select>
+        </td>
+        </tr>
+
+        <tr>
+          <td></td>
+
+          <td>
+         <select id="loc2"  onchange="locationchange2(this);">
+        </select>
+      </td>
+
+      </tr>
+      </table>
+    </form>
+
+    </div>
 
     <div id="basemaps-selecter">
 
@@ -658,34 +694,6 @@ function getDefaultJsonHeaders() { return {
     'Content-Type': 'application/x-www-form-urlencoded',
 }}
 
-function  GetSymbolsF_old( url ){
-
-     //console.log(JSON.stringify(RasterLayers));
-     var request = new XMLHttpRequest();
-        request.open("GET", url, false);
-
-        try {
-        request.send();
-
-        if (request.status != 200) {
-             alert(`Error ${request.status}: ${request.statusText}`);
-              } else {
-                var  gj = request.response;
-      
-                gsym = JSON.parse(gj);
-
-              return gsym;
-              }
-
-
-
-        }
-        catch( err ){
-          alert("request failed");
-        }
-
-
-}
 
 
 
@@ -711,6 +719,7 @@ async function  GetSymbolsF( url ){
 
 
 
+
 //map.on('load', function () {
 
   var  dpurl;
@@ -729,11 +738,97 @@ async function  GetSymbolsF( url ){
 
  var   GetSymbols = dpurl + "?cmd=SYMBOLS";
 
+
+ var   GetLocations = dpurl + "?cmd=GETLOCATION";
+
 SymbolList = [];
 var  idTrans = {};
 var gfeature ;
+var LocationList = [];
+var LocJumpList = {};
 
 
+
+
+
+function  SetcyoumokuList( sform, id, tlist ) {
+
+while(sform.firstChild){
+  sform.removeChild(sform.firstChild);
+}
+
+for ( const tyou  of  tlist ){
+
+    if ( tyou["旧町名コード"]== id) {
+
+
+      var option = document.createElement("option");
+      
+ // optionタグのテキストを4に設定する
+      option.text = tyou["名前"];
+ // optionタグのvalueを4に設定する
+      option.value = tyou["ID"]
+ // selectタグの子要素にoptionタグを追加する
+      sform.appendChild(option);
+
+    }
+
+}
+
+
+}
+
+
+function locationchange1(select){
+
+    var idx = select.selectedIndex;
+    var value = select.options[idx].value; // 値
+    var text  = select.options[idx].text;  // 表示テキスト
+
+
+
+    sform = document.getElementById("loc2");
+    tlist = LocationList[1];
+
+
+
+   //   下部のリストの更新
+
+   //   座標の取得
+   if ( value ){
+
+        SetcyoumokuList( sform, value, tlist ) ;
+      }
+
+}
+
+function locationchange2(select){
+
+    var idx = select.selectedIndex;
+    var value = select.options[idx].value; // 値
+    var text  = select.options[idx].text;  // 表示テキスト
+
+     
+    if ( value ){
+
+      var  tgloc = LocJumpList[ value ];
+
+      var xp = tgloc["経度"];
+      var yp = tgloc["緯度"];
+
+      var zooml = tgloc["ズームレベル"];
+
+      //lng = gf[0];
+     //lat = gf[1];
+      map.flyTo( {center:[xp,yp], zoom:zooml, speed:0.3});
+
+     // alert( tgloc["緯度"]);
+      }
+
+
+
+
+}
 
 map.once('load', async () => {
 
@@ -892,19 +987,26 @@ map.addLayer({
        //  console.log(ihtml);
         // SetDragScript();   //  動的に作成した要素に対するイベントは作成後に追加　　ドラッグイベントを追加
 
-/*
-        var request = new XMLHttpRequest();
-        request.open("GET", GetFURL, true);
-        request.send();
-      
-        request.responseTyoe = 'json';
 
-        request.onload = function() {   //onload
-             var  gj = request.response;
-      
-             gfeature = JSON.parse(gj);
-      
-             if ( gfeature["features"].length > 1 ) {  //  地物があるか
+   
+  
+ //  追加点リスト
+    fetch(GetFURL, {
+        method: "GET",
+        mode: "cors"
+     })
+     .then(response => {
+       if (response.ok) {
+          return response.json();
+       }
+    // 404 や 500 ステータスならここに到達する
+      throw new Error('Network response was not ok.');
+      })
+    .then(resJson => {
+
+       gfeature = resJson;
+
+       if ( gfeature["features"].length > 1 ) {  //  地物があるか
                 var bbox = turf.bbox(gfeature);
          
                 map.fitBounds( bbox );
@@ -926,11 +1028,10 @@ map.addLayer({
               }
              }      //  地物があるか
 
-      
-      
-           //       icon   id の追加
 
-           gfeature["features"].forEach(function (feature) {
+        //       icon   id の追加
+
+        gfeature["features"].forEach(function (feature) {
                    fkind = feature.properties['kind'];
 
                     ad =  idTrans[fkind];
@@ -939,16 +1040,15 @@ map.addLayer({
 
              });
 
-
-       map.addSource( 
+             map.addSource( 
                            'rpoints', {
                               'type': 'geojson',
                               'data': gfeature
                                 }
       
                             );
-       map.addLayer({
-            'id': 'points',
+             map.addLayer({
+                'id': 'points',
             'type': 'symbol',
             'source': 'rpoints',
             'layout': {
@@ -956,13 +1056,76 @@ map.addLayer({
             'icon-size': 0.7
                    }
               });
-          }  //   request.onload = function() {   //onload
-   */
+
+
+           })
+    .catch(error => {
+    // ネットワークエラーの場合はここに到達する
+       console.error(error);
+      })     //ポイントレイヤの読み込み
+
+
+
   })
   .catch(error => {
     // ネットワークエラーの場合はここに到達する
     console.error(error);
   })     //ラスタレイヤの読み込み
+
+
+
+
+  //  位置情報リスト
+  fetch( GetLocations , {
+        method: "GET",
+        mode: "cors"
+     })
+     .then(response => {
+       if (response.ok) {
+          return response.json();
+       }
+    // 404 や 500 ステータスならここに到達する
+      throw new Error('Network response was not ok.');
+      })
+    .then(resJson => {
+
+      LocationList = resJson;
+
+
+      var loc1 = document.getElementById("loc1");
+
+      ll1 = LocationList[0];
+
+      for ( const tm of  ll1 ){
+
+          var option = document.createElement("option");
+          option.text = tm["名前"];
+
+          option.value = tm["ID"];
+
+          loc1.appendChild(option);
+      }
+
+
+          var ll2 = LocationList[1];
+          var loc2 = document.getElementById("loc2");
+
+          var tid = ll1[0]["ID"];
+          SetcyoumokuList( loc2, tid, ll2 );
+
+
+            //　ID がキーの連想配列を作成する
+          for ( const tm of  ll2 ){
+              LocJumpList[ tm["ID"] ]= tm;
+          }
+
+
+
+    })
+    .catch(error => {
+    // ネットワークエラーの場合はここに到達する
+       console.error(error);
+      })     //ポイントレイヤの読み込み
 
 
 
@@ -989,12 +1152,12 @@ map.addLayer({
 
  
  //   ポップアップ
-new maplibregl.Popup()
-.setLngLat(coordinates)
-.setHTML(description)
-.addTo(map);
+       new maplibregl.Popup()
+              .setLngLat(coordinates)
+              .setHTML(description)
+                .addTo(map);
 
-  });
+        });    //  map.on('click')
 
 
 
