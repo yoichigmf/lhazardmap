@@ -382,7 +382,7 @@ a{
 
       <form name="locform">
       <table>
-        <tr><td>旧町名</td>
+        <tr><td><div id="ltitle1"></div></td>
 
           <td>
          <select id="loc1"  onchange="locationchange1(this);">
@@ -391,7 +391,7 @@ a{
         </tr>
 
         <tr>
-          <td></td>
+          <td><div id="ltitle2"></div></td>
 
           <td>
          <select id="loc2"  onchange="locationchange2(this);">
@@ -729,7 +729,7 @@ async function  GetSymbolsF( url ){
   else {
     
  
-       dpurl = "https://script.google.com/macros/s/AKfycbxLmLP8bWDspXHvxXW-B3m2reeGWPtWazpsF-k94R3y0LAikmN3iO2Vr7aFSQf5S6Im_g/exec";
+       dpurl = "https://script.google.com/macros/s/AKfycbyosqodOp7t5NNXrzM8hhtTQZCb8BpPEiVurWpuQ9ja9brMQejnLW9DbbPBcRwradgIqw/exec";
   }
 
  var   GetFURL  = dpurl + "?cmd=GETFEATURS";
@@ -757,17 +757,19 @@ while(sform.firstChild){
   sform.removeChild(sform.firstChild);
 }
 
-for ( const tyou  of  tlist ){
+nlist = tlist["records"];
 
-    if ( tyou["旧町名コード"]== id) {
+for ( const tyou  of  nlist ){
+
+    if ( tyou[tlist["skey"]]== id) {
 
 
       var option = document.createElement("option");
       
  // optionタグのテキストを4に設定する
-      option.text = tyou["名前"];
+      option.text = tyou[tlist["name"]];
  // optionタグのvalueを4に設定する
-      option.value = tyou["ID"]
+      option.value = tyou[tlist["id"]];
  // selectタグの子要素にoptionタグを追加する
       sform.appendChild(option);
 
@@ -797,7 +799,7 @@ function locationchange1(select){
    //   座標の取得
    if ( value ){
 
-        SetcyoumokuList( sform, value, tlist ) ;
+        SetcyoumokuList( sform, value, tlist) ;
       }
 
 }
@@ -808,15 +810,17 @@ function locationchange2(select){
     var value = select.options[idx].value; // 値
     var text  = select.options[idx].text;  // 表示テキスト
 
+    lcp = LocationList[1];
+
      
     if ( value ){
 
       var  tgloc = LocJumpList[ value ];
 
-      var xp = tgloc["経度"];
-      var yp = tgloc["緯度"];
+      var xp = tgloc[lcp["xp"]];
+      var yp = tgloc[lcp["yp"]];
 
-      var zooml = tgloc["ズームレベル"];
+      var zooml = tgloc[lcp["zoom"]];
 
       //lng = gf[0];
      //lat = gf[1];
@@ -1091,17 +1095,27 @@ map.addLayer({
 
       LocationList = resJson;
 
+      if (LocationList.length > 0 ){
+        //   住所リストの内容がない場合セレクタを非表示にして終了
+      
+
 
       var loc1 = document.getElementById("loc1");
 
       ll1 = LocationList[0];
 
-      for ( const tm of  ll1 ){
+      //   タイトル表示
+
+      
+      var namec = ll1["name"];
+      var idc = ll1["id"];
+
+      for ( const tm of  ll1["records"] ){
 
           var option = document.createElement("option");
-          option.text = tm["名前"];
+          option.text = tm[namec];
 
-          option.value = tm["ID"];
+          option.value = tm[idc];
 
           loc1.appendChild(option);
       }
@@ -1110,15 +1124,19 @@ map.addLayer({
           var ll2 = LocationList[1];
           var loc2 = document.getElementById("loc2");
 
-          var tid = ll1[0]["ID"];
-          SetcyoumokuList( loc2, tid, ll2 );
+          var tid = ll1["records"][0][idc];
+          SetcyoumokuList( loc2, tid, ll2);
 
 
             //　ID がキーの連想配列を作成する
-          for ( const tm of  ll2 ){
+          for ( const tm of  ll2["records"] ){
               LocJumpList[ tm["ID"] ]= tm;
           }
-
+        }
+        else {
+          selecter_d= document.getElementById("location-selecter");
+          selecter_d.style.display ="none";
+        }
 
 
     })
