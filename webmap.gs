@@ -918,36 +918,96 @@ return gjson;
 
 }
 
+//
+function TestLocation(){
+   var lj = GetLocationJson();
+
+   return lj;
+
+}
+
 //   位置情報構造JSONの取得
 function  GetLocationJson(){
 
+  
+
+
  var pSheet = getPropetySheet();
+ 
+ 
+   var loc1  = pSheet.getRange( 4, 3).getValue();
+   var loc2  = pSheet.getRange( 5, 3).getValue();
 
-   var loc1  = pSheet.getRange( 4, 2).getValue();
-   var loc2  = pSheet.getRange( 4, 3).getValue();
+ var  retJ = [];
 
-
-  var  retJ = [];
+  //     プロパティシートに値が定義されていない場合は内容のない配列を返す
+ 　if ( pSheet.getRange( 4, 3).isBlank()) {
+        return retJ;
+   }
+ 
+  　if ( pSheet.getRange( 5, 3).isBlank()) {
+        return retJ;
+   }
 
 　var  json1 = GetJsonFromSheet( loc1 );
 
+  var tgrow = 4;
+
   if ( json1 ){
-    retJ.push( json1);
+
+　　var title =  pSheet.getRange( tgrow, 2).getValue();
+   var   kid =  pSheet.getRange( tgrow, 4).getValue();
+
+   var  namek  =  pSheet.getRange( tgrow, 5).getValue();
+
+    var  locr = {};
+
+    locr["title"] = title;
+    locr["id"] = kid;
+    locr["name"] = namek;
+    locr["records"] = json1;
+    retJ.push( locr);
+    //retJ.push( json1);
+  }
+  else {
+    return retJ;
   }
   
   var  json2 = GetJsonFromSheet( loc2 );
-
+  tgrow = 5;
   if ( json2 ){
-    retJ.push( json2 );
+
+   var title =  pSheet.getRange( tgrow, 2).getValue();
+   var   kid =  pSheet.getRange( tgrow, 4).getValue();
+
+   var  namek  =  pSheet.getRange( tgrow, 5).getValue();
+   var  skey  =  pSheet.getRange( tgrow, 6).getValue();
+   var  xp  =  pSheet.getRange( tgrow, 7).getValue();
+   var  yp  =  pSheet.getRange( tgrow, 8).getValue();
+  var  zoom  =  pSheet.getRange( tgrow, 9).getValue();
+
+    var  locr = {};
+    locr["title"] = title;
+    locr["id"] = kid;
+    locr["name"] = namek;
+    locr["skey"] = skey;
+    locr["xp"] = xp;
+    locr["yp"] = yp;
+    locr["zoom"] = zoom;
+    locr["records"] = json2;
+    retJ.push( locr);
+   // retJ.push( json2 );
   }
 
-  console.log( retJ );
+  //console.log( retJ );
   return retJ;
   
 }
 
 
 function GetJsonFromSheet( sheetname ){
+
+
    let tgSheet =  SpreadsheetApp.getActiveSpreadsheet().getSheetByName( sheetname );
 
    const rows = tgSheet.getLastRow(); 
