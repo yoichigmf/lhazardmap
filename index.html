@@ -656,15 +656,21 @@ function toggleSidebar(id) {
   elem.className = classes.join(' ');
 }
 
-tstyle =  'https://raw.githubusercontent.com/gsi-cyberjapan/optimal_bvmap/main/style/skeleton.json'
+tstyle =  'https://raw.githubusercontent.com/gsi-cyberjapan/optimal_bvmap/main/style/skeleton.json';
 
-stdstyle =  'https://raw.githubusercontent.com/gsi-cyberjapan/gsivectortile-mapbox-gl-js/master/std.json'
+stdstyle =  'https://raw.githubusercontent.com/gsi-cyberjapan/gsivectortile-mapbox-gl-js/master/std.json';
+
+var centerx = 139.4195;
+var centery = 35.694239;
+
+//[134.0188, 34.755387],  
+
 
 var map = new maplibregl.Map({
   container: 'map',
   hash: true,
   style: stdstyle , //style.jsonへのパス
-  center: [134.0188, 34.755387],  
+  center: [centerx, centery],  
   zoom: 15,
   maxZoom: 17.99,
   minZoom: 4,
@@ -720,7 +726,7 @@ async function  GetSymbolsF( url ){
 
 
 
-//map.on('load', function () {
+
 
   var  dpurl;
   if ( GasMode == 1 ){
